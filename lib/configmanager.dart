@@ -1,4 +1,3 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 import 'dart:convert';
@@ -17,15 +16,15 @@ class ConfigManager {
 
   // WARNING! For development only. In production, the app should hit your own backend server to get an access token, using "token authentication" (see https://dev.hume.ai/docs/introduction/api-key#token-authentication)
   String fetchHumeApiKey() {
-    return dotenv.env['HUME_API_KEY'] ?? "";
+    return '7gKGuApaxSgbHVpJ6vPPx1wdaT5AGqEYp8f7ppy8GAXpsxvD';
   }
 
   Future<String> fetchAccessToken() async {
-    final humeApiKey = dotenv.env['HUME_API_KEY'];
-    final humeSecretKey = dotenv.env['HUME_SECRET_KEY'];
-    if (humeApiKey == null || humeSecretKey == null) {
-      throw Exception('Please set HUME_API_KEY and HUME_SECRET_KEY in your .env file');
-    }
+    final humeApiKey = '7gKGuApaxSgbHVpJ6vPPx1wdaT5AGqEYp8f7ppy8GAXpsxvD';
+    final humeSecretKey = 'RZxvATieyZJhFzGnHFUxGCE4rkQG2ySio0QGhCs9ZmYUpO9OmFxmnDdM8qkyneJw';
+    // if (humeApiKey == null || humeSecretKey == null) {
+    //   throw Exception('Please set HUME_API_KEY and HUME_SECRET_KEY in your .env file');
+    // }
 
     final response = await http.post(
       Uri.parse('https://api.hume.ai/oauth2-cc/token'),
@@ -47,13 +46,13 @@ class ConfigManager {
   Future<void> loadConfig() async {
     // Make sure to create a .env file in your root directory which mirrors the .env.example file
     // and add your API key and an optional EVI config ID.
-    await dotenv.load();
+    // await dotenv.load();
 
     // // WARNING! For development only.
     humeApiKey = fetchHumeApiKey();
 
     // Uncomment this to use an access token in production.
     // humeAccessToken = await fetchAccessToken();
-    humeConfigId = dotenv.env['HUME_CONFIG_ID'] ?? '';
+    humeConfigId = '2d1e72a4-7143-4739-8cfa-d4ff67b57f7a';
   }
 }
