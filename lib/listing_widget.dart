@@ -1,4 +1,7 @@
 import 'package:cogniosis/dimensions.dart';
+import 'package:cogniosis/media_item_screen.dart';
+import 'package:cogniosis/media_player_screen.dart';
+import 'package:cogniosis/task_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cogniosis/home_screen.dart';
@@ -15,12 +18,20 @@ class MediaItem {
   final String title;
   final String duration;
   final String author;
+  final String description;
+  final bool isFavourite;
+  final List<String> mediaUrls;
+  final Function(MediaItem) onFavouritePressed;
 
   MediaItem({
     required this.image,
     required this.title,
     required this.duration,
-      required this.author,
+    required this.author,
+    required this.description,
+    required this.isFavourite,
+    required this.onFavouritePressed,
+    required this.mediaUrls,
   });
 }
 
@@ -32,6 +43,8 @@ class ListingWidget extends StatefulWidget {
   final String? title;
   final List<String> categories;
   final Function(String) onCategorySelected;
+  final double? heigthConstrain;
+  final String? selectedCategory;
 
   const ListingWidget({
     Key? key,
@@ -40,8 +53,10 @@ class ListingWidget extends StatefulWidget {
     this.headerPresent = false,
     this.titlePresent = false,
     this.title,
+    this.selectedCategory,
     required this.categories,
     required this.onCategorySelected,
+    this.heigthConstrain = 250,
   }) : assert(
           !titlePresent || (titlePresent && title != null),
           'Title must be provided when titlePresent is true',
@@ -63,7 +78,7 @@ class _ListingWidgetState extends State<ListingWidget> {
   void initState() {
     super.initState();
     if (widget.categories.isNotEmpty) {
-      selectedCategory = widget.categories[0];
+      selectedCategory = widget.selectedCategory ?? widget.categories[0];
     }
   }
 
@@ -78,7 +93,29 @@ class _ListingWidgetState extends State<ListingWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        widget.titlePresent ? _buildTitle(themeProvider) : SizedBox(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            widget.titlePresent ? _buildTitle(themeProvider) : SizedBox(),
+            (widget.cardType == CardType.media && widget.mediaCardType == MediaCardType.four) ? TextButton(
+              onPressed: () {
+                setState(() {
+                  selectedCategory = selectedCategory == 'All' ? widget.selectedCategory! : 'All';
+                });
+              },
+              child: Text( selectedCategory == 'All' ? 'View favourites' : 'View all', style: TextStyle(color: themeProvider.isDarkMode ? Colors.grey[400] : Colors.grey[400], fontFamily: 'Satoshi', fontSize: getHeight(context, 14), fontWeight: FontWeight.w500),),
+            ) : SizedBox(),
+             (widget.cardType == CardType.task) ? TextButton(
+              onPressed: () {
+                setState(() {
+                  selectedCategory = selectedCategory == 'All' ? widget.selectedCategory! : 'All';
+                });
+              },
+              child: Text( selectedCategory == 'All' ? 'View Pending' : 'See all', style: TextStyle(color: themeProvider.isDarkMode ? Colors.grey[400] : Colors.grey[400], fontFamily: 'Satoshi', fontSize: getHeight(context, 14), fontWeight: FontWeight.w500),),
+            ) : SizedBox(),
+          ],
+        ),
         widget.headerPresent
             ? Container(
                 width: MediaQuery.of(context).size.width,
@@ -176,7 +213,7 @@ class _ListingWidgetState extends State<ListingWidget> {
     final tasks = taskProvider.getTasksByCategory(selectedCategory);
     return ConstrainedBox(
       constraints: BoxConstraints(
-        maxHeight: getHeight(context, 250), // Constrain the height
+        maxHeight: getHeight(context, widget.heigthConstrain!), // Constrain the height
       ),
       child: ListView.builder(
         itemCount: tasks.length,
@@ -185,14 +222,7 @@ class _ListingWidgetState extends State<ListingWidget> {
           bool isnotChecked = !task.isCompleted;
           return StatefulBuilder(
             builder: (context, setState) {
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    isnotChecked = !isnotChecked;
-                    taskProvider.toggleTaskCompletion(task);
-                  });
-                },
-                child: Container(
+              return  Container(
                   padding: EdgeInsets.all(getWidth(context, 10)),
                   margin: EdgeInsets.symmetric(vertical: getHeight(context, 4)),
                   decoration: BoxDecoration(
@@ -203,6 +233,14 @@ class _ListingWidgetState extends State<ListingWidget> {
                   ),
                   child: Row(
                     children: [
+                      GestureDetector(
+                onTap: () {
+                  setState(() {
+                    isnotChecked = !isnotChecked;
+                    taskProvider.toggleTaskCompletion(task);
+                  });
+                },
+                child:
                       Container(
                         margin: EdgeInsets.all(getWidth(context, 8)),
                         width: getWidth(context, 20),
@@ -228,13 +266,24 @@ class _ListingWidgetState extends State<ListingWidget> {
                           size: getHeight(context, 15),
                         ) : SizedBox(),
                       ),
+                      ),
                       SizedBox(width: getWidth(context, 12)),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
                         child: Image.asset(task.image, height: getWidth(context, 72), width: getWidth(context, 72), fit: BoxFit.cover,),
                       ),
                       SizedBox(width: getWidth(context, 20)),
-                      Expanded(
+                      GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TaskScreen(task: task),
+                    ),
+                  );
+                },
+                child:
+                      Container(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -249,7 +298,7 @@ class _ListingWidgetState extends State<ListingWidget> {
                             ),
                             SizedBox(height: 4),
                             Text(
-                              task.duration,
+                              '${task.duration.inMinutes} mins',
                               style: TextStyle(
                                 color: isnotChecked && !themeProvider.isDarkMode ? Colors.black : Colors.white,
                                 fontSize: getHeight(context, 12),
@@ -258,7 +307,7 @@ class _ListingWidgetState extends State<ListingWidget> {
                               ),
                             ),
                             Text(
-                              task.date,
+                              '${task.date.hour}:${task.date.minute} - ${task.date.day}/${task.date.month}/${task.date.year}',
                               style: TextStyle(
                                 color: isnotChecked && !themeProvider.isDarkMode ? Colors.black : Colors.white,
                                 fontSize: getHeight(context, 12),
@@ -269,9 +318,9 @@ class _ListingWidgetState extends State<ListingWidget> {
                           ],
                         ),
                       ),
+                      )
                     ],
                   ),
-                ),
               );
             },
           );
@@ -285,11 +334,11 @@ class _ListingWidgetState extends State<ListingWidget> {
       case MediaCardType.one:
         return _buildMediaCardTypeOne(themeProvider, musicProvider, videoProvider, exerciseProvider);
       case MediaCardType.two:
-        return _buildMediaCardTypeTwo();
+        return _buildMediaCardTypeTwo(themeProvider, musicProvider, videoProvider, selectedCategory);
       case MediaCardType.three:
-        return _buildMediaCardTypeThree();
+        return _buildMediaCardTypeThree(themeProvider, musicProvider);
       case MediaCardType.four:
-        return _buildMediaCardTypeFour();
+        return _buildMediaCardTypeFour(themeProvider, musicProvider, videoProvider, exerciseProvider);
     }
   }
 
@@ -315,9 +364,19 @@ class _ListingWidgetState extends State<ListingWidget> {
             ),
             child: Column(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(mediaItem.image, height: getWidth(context, 187), width: MediaQuery.of(context).size.width, fit: BoxFit.cover,),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MediaItemScreen(mediaItem: mediaItem),
+                      ),
+                    );
+                  },
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(mediaItem.image, height: getWidth(context, 187), width: MediaQuery.of(context).size.width, fit: BoxFit.cover,),
+                  ),
                 ),
                 SizedBox(height: getHeight(context, 10)),
                 Container(
@@ -366,7 +425,14 @@ class _ListingWidgetState extends State<ListingWidget> {
                           ),
                           child: Center(
                             child: IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MediaPlayerScreen(mediaItem: mediaItem),
+                                  ),
+                                );
+                              },
                               icon: Icon(Icons.play_arrow, color: themeProvider.isDarkMode ? Colors.black : Colors.white,),
                               iconSize: getHeight(context, 20),
                             ),
@@ -383,91 +449,354 @@ class _ListingWidgetState extends State<ListingWidget> {
     );
   }
 
-  Widget _buildMediaCardTypeTwo() {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            height: 150,
+  Widget _buildMediaCardTypeTwo(ThemeProvider themeProvider, MusicProvider musicProvider, VideoProvider videoProvider, selectedCategory) {
+    final List<MediaItem> mediaItems =  selectedCategory == 'Music' ? musicProvider.getMusic() as List<MediaItem> : videoProvider.getVideos() as List<MediaItem>;
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: getHeight(context, 300), // Constrain the height
+      ),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: mediaItems.length,
+        itemBuilder: (context, index) {
+          final mediaItem = mediaItems[index];
+          return Container(
+            width: getWidth(context, 200),
+            margin: EdgeInsets.symmetric(horizontal: getWidth(context, 10)),
             decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/placeholder.jpg'),
-                fit: BoxFit.cover,
-              ),
+              borderRadius: BorderRadius.circular(12),
             ),
-          ),
-        ),
-        Expanded(
-          child: Container(
-            height: 150,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/placeholder.jpg'),
-                fit: BoxFit.cover,
-              ),
+            child: Column(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    // Handle tap event
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MediaItemScreen(mediaItem: mediaItem),
+                      ),
+                    );
+                  },
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(mediaItem.image, height: getWidth(context, 187), width: MediaQuery.of(context).size.width, fit: BoxFit.cover,),
+                  ),
+                ),
+                SizedBox(height: getHeight(context, 10)),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: getWidth(context, 10)),
+                  child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: getWidth(context, 130),
+                              child: Text(
+                                mediaItem.title,
+                                style: TextStyle(
+                                  color: themeProvider.isDarkMode ? Colors.white : Colors.black,
+                                  fontSize: getHeight(context, 18),
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Satoshi',
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Text(
+                              mediaItem.author,
+                              style: TextStyle(
+                                color: themeProvider.isDarkMode ? Colors.white : Color(0xFF828282),
+                                fontSize: getHeight(context, 14),
+                                fontFamily: 'Satoshi',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                       Container(
+                          height: getHeight(context, 40),
+                          width: getHeight(context, 40),
+                          decoration: BoxDecoration(
+                            gradient: RadialGradient(
+                              center: Alignment.center,
+                              radius: 0.5,
+                              colors: [
+                                Color(0xFF3CC7D4),
+                                Color(0xFF099AA8),
+                              ],
+                              stops: [0.0, 1.0],
+                            ),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: IconButton(
+                              onPressed: () {
+                                  Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MediaPlayerScreen(mediaItem: mediaItem),
+                                  ),
+                                );
+                              },
+                              icon: Icon(Icons.play_arrow, color: themeProvider.isDarkMode ? Colors.black : Colors.white,),
+                              iconSize: getHeight(context, 20),
+                            ),
+                          ),
+                       ),
+                      ],
+                    ),
+                ),
+              ],
             ),
-          ),
-        ),
-      ],
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildMediaCardTypeThree() {
-    return Column(
-      children: [
-        Container(
-          height: 150,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/placeholder.jpg'),
-              fit: BoxFit.cover,
+  Widget _buildMediaCardTypeThree(ThemeProvider themeProvider, MusicProvider musicProvider) {
+    final List<MediaItem> mediaItems = musicProvider.getMusic() ;
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: getHeight(context, 500), // Constrain the height
+      ),
+      child: ListView.builder(
+        itemCount: mediaItems.length,
+        itemBuilder: (context, index) {
+          final mediaItem = mediaItems[index];
+          return Container(
+            margin: EdgeInsets.symmetric(vertical: getHeight(context, 10)),
+            padding: EdgeInsets.symmetric(horizontal: getWidth(context, 10), vertical: getHeight(context, 15)),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: themeProvider.isDarkMode ? Colors.grey[800] : Colors.white
             ),
-          ),
-        ),
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                height: 100,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/placeholder.jpg'),
-                    fit: BoxFit.cover,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MediaItemScreen(mediaItem: mediaItem),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.asset(mediaItem.image, height: getWidth(context, 68), width: getWidth(context, 68), fit: BoxFit.cover,),
+                        ),
+                        SizedBox(width: getWidth(context, 10)),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                  mediaItem.title,
+                                style: TextStyle(
+                                  color: themeProvider.isDarkMode ? Colors.white : Colors.black,
+                                  fontSize: getHeight(context, 18),
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Satoshi',
+                                ),
+                              ),
+                              SizedBox(height: getHeight(context, 5)),
+                              Text(
+                                mediaItem.duration,
+                                style: TextStyle(
+                                  color:  Color(0xFF828282),
+                                  fontSize: getHeight(context, 12),
+                                  fontFamily: 'Satoshi',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                mediaItem.author,
+                                style: TextStyle(
+                                  color: themeProvider.isDarkMode ? Colors.white : Color(0xFF828282),
+                                  fontSize: getHeight(context, 14),
+                                  fontFamily: 'Satoshi',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ),
-            Expanded(
-              child: Container(
-                height: 100,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/placeholder.jpg'),
-                    fit: BoxFit.cover,
-                  ),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: getWidth(context, 10)),
+                  child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                       Container(
+                          height: getHeight(context, 40),
+                          width: getHeight(context, 40),
+                          decoration: BoxDecoration(
+                            gradient: RadialGradient(
+                              center: Alignment.center,
+                              radius: 0.5,
+                              colors: [
+                                Color(0xFF3CC7D4),
+                                Color(0xFF099AA8),
+                              ],
+                              stops: [0.0, 1.0],
+                            ),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: IconButton(
+                              onPressed: () {
+                                  Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MediaPlayerScreen(mediaItem: mediaItem),
+                                  ),
+                                );
+                              },
+                              icon: Icon(Icons.play_arrow, color: themeProvider.isDarkMode ? Colors.black : Colors.white,),
+                              iconSize: getHeight(context, 20),
+                            ),
+                          ),
+                       ),
+                      ],
+                    ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ],
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildMediaCardTypeFour() {
-    return GridView.count(
-      shrinkWrap: true,
-      crossAxisCount: 2,
-      children: List.generate(4, (index) {
-        return Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/placeholder.jpg'),
-              fit: BoxFit.cover,
+  Widget _buildMediaCardTypeFour(ThemeProvider themeProvider, MusicProvider musicProvider, VideoProvider videoProvider, ExerciseProvider exerciseProvider) {
+   final List<MediaItem> mediaItems = selectedCategory == 'All' ? 
+   [
+    ...musicProvider.getMusic(),
+    ...videoProvider.getVideos(),
+    ...exerciseProvider.getExercises(),
+   ]
+   :
+   [
+     ...musicProvider.getMusic().where((item) => item.isFavourite),
+     ...videoProvider.getVideos().where((item) => item.isFavourite),
+     ...exerciseProvider.getExercises().where((item) => item.isFavourite),
+   ];
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: getHeight(context, 500), // Constrain the height
+      ),
+      child: ListView.builder(
+        itemCount: mediaItems.length,
+        itemBuilder: (context, index) {
+          final mediaItem = mediaItems[index];
+          return Container(
+            margin: EdgeInsets.symmetric(vertical: getHeight(context, 10)),
+            padding: EdgeInsets.symmetric(horizontal: getWidth(context, 10), vertical: getHeight(context, 15)),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: themeProvider.isDarkMode ? Colors.grey[800] : Colors.white
             ),
-          ),
-        );
-      }),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(mediaItem.image, height: getWidth(context, 68), width: getWidth(context, 68), fit: BoxFit.cover,),
+                      ),
+                      SizedBox(width: getWidth(context, 10)),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                                mediaItem.title,
+                              style: TextStyle(
+                                color: themeProvider.isDarkMode ? Colors.white : Colors.black,
+                                fontSize: getHeight(context, 18),
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Satoshi',
+                              ),
+                            ),
+                            SizedBox(height: getHeight(context, 5)),
+                            Text(
+                              mediaItem.duration,
+                              style: TextStyle(
+                                color:  Color(0xFF828282),
+                                fontSize: getHeight(context, 12),
+                                fontFamily: 'Satoshi',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              mediaItem.author,
+                              style: TextStyle(
+                                color: themeProvider.isDarkMode ? Colors.white : Color(0xFF828282),
+                                fontSize: getHeight(context, 14),
+                                fontFamily: 'Satoshi',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: getWidth(context, 10)),
+                  child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                       Container(
+                          height: getHeight(context, 40),
+                          width: getHeight(context, 40),
+                          decoration: BoxDecoration(
+                            // gradient: RadialGradient(
+                            //   center: Alignment.center,
+                            //   radius: 0.5,
+                            //   colors: [
+                            //     Color(0xFF3CC7D4),
+                            //     Color(0xFF099AA8),
+                            //   ],
+                            //   stops: [0.0, 1.0],
+                            // ),
+                            color: themeProvider.isDarkMode ? Colors.black : Color(0xFFE0E0E0),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: IconButton(
+                              onPressed: () {
+                                mediaItem.onFavouritePressed(mediaItem);
+                              },
+                              icon: Icon(Icons.favorite, color: mediaItem.isFavourite ? Color(0xFF099AA8) : Color(0xFF828282),),
+                              iconSize: getHeight(context, 20),
+                            ),
+                          ),
+                       ),
+                      ],
+                    ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }

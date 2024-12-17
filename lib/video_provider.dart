@@ -16,12 +16,17 @@ class VideoContent {
   final String author;
   final String image;
   final List<Video> videos;
+  final String description;
+ bool isFavourite; 
+
 
   VideoContent({
     required this.title,
     required this.author,
     required this.image,
     required this.videos,
+      required this.isFavourite,
+    required this.description,
   });
 }
 
@@ -35,6 +40,8 @@ class VideoProvider with ChangeNotifier {
         Video(duration: Duration(minutes: 20), url: 'https://example.com/video1.mp4'),
         Video(duration: Duration(minutes: 30), url: 'https://example.com/video2.mp4'),
       ],
+      isFavourite: false,
+      description: 'This is a meditation session',
     ),
     VideoContent(
       title: 'Yoga for Beginners',
@@ -44,6 +51,8 @@ class VideoProvider with ChangeNotifier {
         Video(duration: Duration(minutes: 15), url: 'https://example.com/video3.mp4'),
         Video(duration: Duration(minutes: 25), url: 'https://example.com/video4.mp4'),
       ],
+      isFavourite: false,
+      description: 'This is a yoga session',
     ),
     VideoContent(
       title: 'Advanced Yoga',
@@ -53,16 +62,29 @@ class VideoProvider with ChangeNotifier {
         Video(duration: Duration(minutes: 40), url: 'https://example.com/video5.mp4'),
         Video(duration: Duration(minutes: 50), url: 'https://example.com/video6.mp4'),
       ],
+      isFavourite: false,
+      description: 'This is an advanced yoga session',
     ),
     // Add more video content as needed
   ];
+
+  void toggleFavourite(VideoContent videoContent) {
+    videoContent.isFavourite = !videoContent.isFavourite;
+    notifyListeners();
+  }
 
   List<MediaItem> getVideos() {
     return _videos.map((videoContent) => MediaItem(
       image: videoContent.image,
       title: videoContent.title,
-      duration: videoContent.videos.first.duration.toString(),
+      duration: '${videoContent.videos.first.duration.inHours}h ${videoContent.videos.first.duration.inMinutes.remainder(60)}m',
       author: videoContent.author,
+      description: videoContent.description,
+      isFavourite: videoContent.isFavourite,
+      mediaUrls: videoContent.videos.map((video) => video.url).toList(),
+      onFavouritePressed: (mediaItem) {
+        toggleFavourite(videoContent);
+      },
     )).toList();
   }
 }

@@ -16,6 +16,8 @@ class Music {
   final String author;
   final String image;
   final List<Melody> melodies;
+  final String description;
+   bool isFavourite; 
   
 
   Music({
@@ -23,7 +25,9 @@ class Music {
     required this.author,
     required this.image,
     required this.melodies,
-  });
+    required this.isFavourite,
+    required this.description,
+    });
 }
 
 class MusicProvider with ChangeNotifier {
@@ -32,39 +36,57 @@ class MusicProvider with ChangeNotifier {
       title: 'Go For Jogging',
       author: 'John Doe',
       image: 'assets/nebula.jpeg',
+      isFavourite: false,
       melodies: [
-        Melody(duration: Duration(minutes: 10), url: 'https://example.com/melody1.mp3'),
-        Melody(duration: Duration(minutes: 15), url: 'https://example.com/melody2.mp3'),
+        Melody(duration: Duration(minutes: 10), url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'),
+        Melody(duration: Duration(minutes: 15), url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3'),
       ],
+      description: 'This is a meditation session',
+
 
     ),
       Music(
       title: 'Go For Jogging',
       author: 'John Doe',
       image: 'assets/nebula.jpeg',
+      isFavourite: false,
       melodies: [
-        Melody(duration: Duration(minutes: 10), url: 'https://example.com/melody1.mp3'),
-        Melody(duration: Duration(minutes: 15), url: 'https://example.com/melody2.mp3'),
+        Melody(duration: Duration(minutes: 10), url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'),
+        Melody(duration: Duration(minutes: 15), url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3'),
       ],
+      description: 'This is a meditation session',
     ),
       Music(
       title: 'Go For Jogging',
       author: 'John Doe',
       image: 'assets/nebula.jpeg',
+      isFavourite: false,
       melodies: [
-        Melody(duration: Duration(minutes: 10), url: 'https://example.com/melody1.mp3'),
-        Melody(duration: Duration(minutes: 15), url: 'https://example.com/melody2.mp3'),
+        Melody(duration: Duration(minutes: 10), url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'),
+        Melody(duration: Duration(minutes: 15), url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3'),
       ],
+      description: 'This is a meditation session',
     )
     // Add more tasks as needed
   ];
 
+  void toggleFavourite(Music music) {
+    music.isFavourite = !music.isFavourite;
+    notifyListeners();
+  }
+
   List<MediaItem> getMusic() {
     return _music.map((music) => MediaItem(
+      description: music.description,
       image: music.image,
       title: music.title,
-      duration: music.melodies.first.duration.toString(),
+      duration: '${music.melodies.first.duration.inHours}h ${music.melodies.first.duration.inMinutes.remainder(60)}m',
       author: music.author,
+      isFavourite: music.isFavourite,
+      mediaUrls: music.melodies.map((melody) => melody.url).toList(),
+      onFavouritePressed: (mediaItem) {
+        toggleFavourite(music);
+      },
     )).toList();
   }
 

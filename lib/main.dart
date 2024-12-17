@@ -3,7 +3,10 @@ import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cogniosis/configmanager.dart';
 import 'package:cogniosis/dimensions.dart';
+import 'package:cogniosis/exercise_provider.dart';
+import 'package:cogniosis/music_provider.dart';
 import 'package:cogniosis/splash_screen.dart';
+import 'package:cogniosis/video_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:record/record.dart';
@@ -36,6 +39,9 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => TaskProvider()), // Provide TaskProvider
+        ChangeNotifierProvider(create: (_) => MusicProvider()),
+        ChangeNotifierProvider(create: (_) => VideoProvider()),
+        ChangeNotifierProvider(create: (_) => ExerciseProvider()),
       ],
       child: MyApp(),
     ),
@@ -51,14 +57,14 @@ class MyApp extends StatelessWidget {
         ConfigManager.instance.humeAccessToken.isEmpty) {
       return MaterialApp(
         debugShowCheckedModeBanner: false,
-          title: 'Flutter with EVI',
+          title: 'Cogniosis',
           home: ErrorMessage(
             message:
                 "Error: Please set your Hume API key in main.dart (or use fetchAccessToken)",
           ),
           theme: appTheme);
     }
-    return MaterialApp(
+    return  MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Cogniosis',
       home: SplashScreen(),

@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cogniosis/expandable_widget.dart'; // Import the expandable widget
 import 'package:cogniosis/listing_widget.dart'; // Import the listing widget
-import 'package:cogniosis/music_provider.dart'; // Import the music provider
-import 'package:cogniosis/video_provider.dart'; // Import the video provider
-import 'package:cogniosis/exercise_provider.dart'; // Import the exercise provider
-import 'package:cogniosis/task_provider.dart'; // Import the task provider
+// Import the task provider
 
 class ThemeProvider with ChangeNotifier {
   bool _isDarkMode = false;
@@ -17,22 +14,21 @@ class ThemeProvider with ChangeNotifier {
     _isDarkMode = !_isDarkMode;
     notifyListeners();
   }
+
+  void setDarkMode(bool isDarkMode) {
+    if (_isDarkMode != isDarkMode) {
+      _isDarkMode = isDarkMode;
+      notifyListeners();
+    }
+  }
 }
 
 class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => MusicProvider()),
-        ChangeNotifierProvider(create: (_) => VideoProvider()),
-        ChangeNotifierProvider(create: (_) => ExerciseProvider()),
-        ChangeNotifierProvider(create: (_) => TaskProvider()),
-      ],
-      child: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, child) {
-          return Scaffold(
+
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    return Scaffold(
             body: Stack(
               children: [
                 Container(
@@ -235,8 +231,6 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
           );
-        },
-      ),
-    );
+        
   }
 }
