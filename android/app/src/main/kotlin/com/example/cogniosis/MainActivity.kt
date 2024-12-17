@@ -1,4 +1,4 @@
-package com.example.cogniosis
+package com.aizen.cogniosisdemo
 
 import io.flutter.embedding.android.FlutterActivity
 
