@@ -82,7 +82,7 @@ class _ConveyorBeltWidgetState extends State<ConveyorBeltWidget>
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8.0),
               image: DecorationImage(
-                image: AssetImage(widget.imageUrls[itemIndex]),
+                image: NetworkImage(widget.imageUrls[itemIndex]),
                 fit: BoxFit.cover,
               ),
             ),

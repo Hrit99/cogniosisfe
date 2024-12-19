@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class Task {
+  final int id;
   final String title;
   final Duration duration;
   final DateTime date;
@@ -10,6 +11,7 @@ class Task {
   bool isCompleted;
 
   Task({
+    required this.id,
     required this.title,
     required this.duration,
     required this.date,
@@ -21,37 +23,9 @@ class Task {
   });
 }
 
+
 class TaskProvider with ChangeNotifier {
-  final List<Task> _tasks = [
-    Task(
-      title: 'Go For Jogging',
-      duration: Duration(minutes: 10),
-      date: DateTime.now(),
-      image: 'assets/nebula.jpeg',
-      durationCompleted: Duration(minutes: 5),
-      isCompleted: true,
-      note: "This is a note",
-    ),
-      Task(
-      title: 'Go For Jogging',
-      duration: Duration(minutes: 10),
-      date: DateTime.now(),
-      image: 'assets/nebula.jpeg',
-      durationCompleted: Duration(minutes: 8),
-        isCompleted: true,
-        note: "This is a note",
-    ),
-      Task(
-      title: 'Go For Jogging',
-      duration: Duration(minutes: 10),
-      date: DateTime.now(),
-        image: 'assets/nebula.jpeg',
-          durationCompleted: Duration(minutes: 0),
-      isCompleted: false,
-      note: "This is a note",
-    )
-    // Add more tasks as needed
-  ];
+  final List<Task> _tasks = [];
 
   List<Task> getTasksByCategory(String category) {
     if (category == 'All') {
@@ -70,6 +44,7 @@ class TaskProvider with ChangeNotifier {
     DateTime now = DateTime.now();
     DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
     DateTime endOfWeek = now.add(Duration(days: DateTime.daysPerWeek - now.weekday));
+    
     return _tasks.where((task) => task.date.isAfter(startOfWeek) && task.date.isBefore(endOfWeek)).toList();
   }
 
@@ -90,6 +65,12 @@ class TaskProvider with ChangeNotifier {
 
   void toggleTaskCompletion(Task task) {
     task.isCompleted = !task.isCompleted;
+    notifyListeners();
+  }
+
+  void setTasks(List<Task> tasks) {
+    _tasks.clear();
+    _tasks.addAll(tasks);
     notifyListeners();
   }
 }

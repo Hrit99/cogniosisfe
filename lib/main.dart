@@ -15,10 +15,14 @@ import 'package:flutter/services.dart'; // Import the services package
 import 'package:provider/provider.dart';
 import 'package:cogniosis/task_provider.dart';
 import 'package:cogniosis/home_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'theme.dart';
+
 import 'chat_card.dart';
 import 'evi_message.dart' as evi;
+
 
 void main() async {
   // Ensure Flutter binding is initialized before calling asynchronous operations
@@ -27,18 +31,27 @@ void main() async {
   // Load config in singleton
   await ConfigManager.instance.loadConfig();
 
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent, // Make status bar transparent
-    statusBarIconBrightness: Brightness.dark, // Set icon color in status bar (dark or light)
-    systemNavigationBarColor: Colors.transparent, // Make system navigation bar transparent
-    systemNavigationBarIconBrightness: Brightness.dark, // Set icon color in navigation bar
+    statusBarIconBrightness:
+        Brightness.dark, // Set icon color in status bar (dark or light)
+    systemNavigationBarColor:
+        Colors.transparent, // Make system navigation bar transparent
+    systemNavigationBarIconBrightness:
+        Brightness.dark, // Set icon color in navigation bar
   ));
+
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => TaskProvider()), // Provide TaskProvider
+        ChangeNotifierProvider(
+            create: (_) => TaskProvider()), // Provide TaskProvider
         ChangeNotifierProvider(create: (_) => MusicProvider()),
         ChangeNotifierProvider(create: (_) => VideoProvider()),
         ChangeNotifierProvider(create: (_) => ExerciseProvider()),
@@ -53,22 +66,31 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (ConfigManager.instance.humeApiKey.isEmpty &&
-        ConfigManager.instance.humeAccessToken.isEmpty) {
-      return MaterialApp(
-        debugShowCheckedModeBanner: false,
-          title: 'Cogniosis',
-          home: ErrorMessage(
-            message:
-                "Error: Please set your Hume API key in main.dart (or use fetchAccessToken)",
-          ),
-          theme: appTheme);
-    }
-    return  MaterialApp(
-      debugShowCheckedModeBanner: false,
+    return MaterialApp(
       title: 'Cogniosis',
-      home: SplashScreen(),
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: FutureBuilder(
+        future: _checkAccessToken(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator(); // Show a loading indicator while checking
+          } else {
+            if (snapshot.data == true) {
+              return HomeScreen(); // Navigate to HomeScreen if access token exists
+            } else {
+              return SplashScreen(); // Navigate to IntroScreen if no access token
+            }
+          }
+        },
+      ),
     );
+  }
+
+  Future<bool> _checkAccessToken() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.containsKey('access_token');
   }
 
   static List<Score> extractTopThreeEmotions(evi.Inference models) {
@@ -108,7 +130,7 @@ class ErrorMessage extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   final String title;
-  final bool isDarkMode ;
+  final bool isDarkMode;
 
   const MyHomePage({super.key, required this.title, required this.isDarkMode});
 
@@ -164,7 +186,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-
     final connectButton = Container(
       decoration: BoxDecoration(
         gradient: RadialGradient(
@@ -205,19 +226,28 @@ class _MyHomePageState extends State<MyHomePage> {
               image: DecorationImage(
                 image: widget.isDarkMode
                     ? AssetImage("assets/voicecallerbgdark.png")
-                    : AssetImage("assets/voicecallerbg.png"), // Replace with your image path
+                    : AssetImage(
+                        "assets/voicecallerbg.png"), // Replace with your image path
                 fit: BoxFit.cover,
               ),
             ),
           ),
           Positioned(
             top: getHeight(context, 100),
-            left: (MediaQuery.of(context).size.width - getWidth(context, 300)) / 2,
-            child: widget.isDarkMode ? Image.asset("assets/logodark.png", height: getHeight(context, 300), width: getWidth(context, 300)) : Image.asset("assets/logo.png", height: getHeight(context, 300), width: getWidth(context, 300)),
+            left: (MediaQuery.of(context).size.width - getWidth(context, 300)) /
+                2,
+            child: widget.isDarkMode
+                ? Image.asset("assets/logodark.png",
+                    height: getHeight(context, 300),
+                    width: getWidth(context, 300))
+                : Image.asset("assets/logo.png",
+                    height: getHeight(context, 300),
+                    width: getWidth(context, 300)),
           ),
           Positioned(
             bottom: getHeight(context, 30),
-            left: (MediaQuery.of(context).size.width - getWidth(context, 362)) / 2,
+            left: (MediaQuery.of(context).size.width - getWidth(context, 362)) /
+                2,
             child: Container(
               height: getHeight(context, 56),
               width: getWidth(context, 362),
@@ -282,7 +312,8 @@ class _MyHomePageState extends State<MyHomePage> {
     if (ConfigManager.instance.humeAccessToken.isNotEmpty) {
       uri += '?access_token=${ConfigManager.instance.humeAccessToken}';
     } else if (ConfigManager.instance.humeApiKey.isNotEmpty) {
-      print("ConfigManager.instance.humeApiKey: ${ConfigManager.instance.humeApiKey}");
+      print(
+          "ConfigManager.instance.humeApiKey: ${ConfigManager.instance.humeApiKey}");
       uri += '?api_key=${ConfigManager.instance.humeApiKey}';
     } else {
       throw Exception('Please set your Hume API credentials in main.dart');
@@ -291,7 +322,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _chatChannel = WebSocketChannel.connect(Uri.parse(uri));
 
     print("uri: $uri");
-    
+
     _chatChannel!.stream.listen(
       (event) async {
         final message = evi.EviMessage.decode(event);
@@ -389,7 +420,6 @@ class _MyHomePageState extends State<MyHomePage> {
     _audioPlayer.stop();
   }
 
-
   void _playNextAudioSegment() {
     if (_playbackAudioQueue.isNotEmpty) {
       final audioSegment = _playbackAudioQueue.removeAt(0);
@@ -446,7 +476,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void _stopRecording() {
     _audioRecorder.stop();
   }
-
 
   // In the `audioplayers` library, iOS does not support playing audio from a `ByteSource` but
   // we can use a `UrlSource` with a data URL.

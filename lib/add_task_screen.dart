@@ -324,11 +324,8 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           ),
           child: ElevatedButton(
             onPressed: () {
-              print(_nameController.text);
-              print(_seconds + _minutes * 60 + _hours * 3600);
-              print(_dateController.text);
-              print(_noteController.text);
               Task task = Task(
+                id: 0,
                 title: _nameController.text,
                 duration: Duration(seconds: _seconds + _minutes * 60 + _hours * 3600),
                 date: DateTime.parse(_dateController.text),

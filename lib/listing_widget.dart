@@ -211,6 +211,27 @@ class _ListingWidgetState extends State<ListingWidget> {
 
   Widget _buildTaskCard(ThemeProvider themeProvider, TaskProvider taskProvider) {
     final tasks = taskProvider.getTasksByCategory(selectedCategory);
+    if (tasks.isEmpty) {
+      return Container(
+        padding: EdgeInsets.all(getWidth(context, 10)),
+        margin: EdgeInsets.symmetric(vertical: getHeight(context, 4)),
+        decoration: BoxDecoration(
+          color: themeProvider.isDarkMode ? Colors.grey[800] : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Center(
+          child: Text(
+            'No tasks to show',
+            style: TextStyle(
+              color: themeProvider.isDarkMode ? Colors.white : Colors.black,
+              fontSize: getHeight(context, 18),
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Satoshi',
+            ),
+          ),
+        ),
+      );
+    }
     return ConstrainedBox(
       constraints: BoxConstraints(
         maxHeight: getHeight(context, widget.heigthConstrain!), // Constrain the height
@@ -222,26 +243,25 @@ class _ListingWidgetState extends State<ListingWidget> {
           bool isnotChecked = !task.isCompleted;
           return StatefulBuilder(
             builder: (context, setState) {
-              return  Container(
-                  padding: EdgeInsets.all(getWidth(context, 10)),
-                  margin: EdgeInsets.symmetric(vertical: getHeight(context, 4)),
-                  decoration: BoxDecoration(
-                    color: isnotChecked 
-                        ? (themeProvider.isDarkMode ? Colors.grey[800] : Colors.white) 
-                        :  Color(0xFF099AA8),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                onTap: () {
-                  setState(() {
-                    isnotChecked = !isnotChecked;
-                    taskProvider.toggleTaskCompletion(task);
-                  });
-                },
-                child:
-                      Container(
+              return Container(
+                padding: EdgeInsets.all(getWidth(context, 10)),
+                margin: EdgeInsets.symmetric(vertical: getHeight(context, 4)),
+                decoration: BoxDecoration(
+                  color: isnotChecked 
+                      ? (themeProvider.isDarkMode ? Colors.grey[800] : Colors.white) 
+                      : Color(0xFF099AA8),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          isnotChecked = !isnotChecked;
+                          taskProvider.toggleTaskCompletion(task);
+                        });
+                      },
+                      child: Container(
                         margin: EdgeInsets.all(getWidth(context, 8)),
                         width: getWidth(context, 20),
                         height: getWidth(context, 20),
@@ -254,7 +274,7 @@ class _ListingWidgetState extends State<ListingWidget> {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: themeProvider.isDarkMode? Colors.black.withOpacity(0.7) : Colors.white.withOpacity(0.7),
+                              color: themeProvider.isDarkMode ? Colors.black.withOpacity(0.7) : Colors.white.withOpacity(0.7),
                               blurRadius: 8,
                               offset: Offset(0, 2),
                             ),
@@ -266,24 +286,23 @@ class _ListingWidgetState extends State<ListingWidget> {
                           size: getHeight(context, 15),
                         ) : SizedBox(),
                       ),
-                      ),
-                      SizedBox(width: getWidth(context, 12)),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.asset(task.image, height: getWidth(context, 72), width: getWidth(context, 72), fit: BoxFit.cover,),
-                      ),
-                      SizedBox(width: getWidth(context, 20)),
-                      GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TaskScreen(task: task),
                     ),
-                  );
-                },
-                child:
-                      Container(
+                    SizedBox(width: getWidth(context, 12)),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(task.image, height: getWidth(context, 72), width: getWidth(context, 72), fit: BoxFit.cover,),
+                    ),
+                    SizedBox(width: getWidth(context, 20)),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TaskScreen(task: task),
+                          ),
+                        );
+                      },
+                      child: Container(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -318,9 +337,9 @@ class _ListingWidgetState extends State<ListingWidget> {
                           ],
                         ),
                       ),
-                      )
-                    ],
-                  ),
+                    )
+                  ],
+                ),
               );
             },
           );

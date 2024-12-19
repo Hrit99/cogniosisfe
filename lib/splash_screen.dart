@@ -1,5 +1,4 @@
 import 'package:cogniosis/dimensions.dart';
-import 'package:cogniosis/home_screen.dart';
 import 'package:cogniosis/intro_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -15,7 +14,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.asset('assets/splashscreenbg.mp4')
+    _controller = VideoPlayerController.networkUrl(Uri.parse('https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/splashscreenbg.mp4'))
       ..initialize().then((_) {
         // Ensure the first frame is shown after the video is initialized.
         setState(() {});
@@ -33,7 +32,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void _navigateToSignUp(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => HomeScreen()),
+      MaterialPageRoute(builder: (context) => IntroScreen()),
     );
   }
 
@@ -60,7 +59,9 @@ class _SplashScreenState extends State<SplashScreen> {
                     ),
                   ),
                 )
-              : Center(child: CircularProgressIndicator()),
+              : SizedBox.expand(
+                  child: Center(child: Container(color: Colors.white,)),
+                ),
           Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,

@@ -12,31 +12,33 @@ class IntroScreen extends StatefulWidget {
 class _IntroScreenState extends State<IntroScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
-  late VideoPlayerController _videoController1;
-  late VideoPlayerController _videoController2;
+  late VideoPlayerController _videoController;
 
   @override
   void initState() {
     super.initState();
-    _videoController1 = VideoPlayerController.asset('assets/womanoncall.mp4')
+    _videoController = VideoPlayerController.networkUrl(Uri.parse('https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/womanoncall.mp4'))
       ..initialize().then((_) {
         setState(() {});
-        _videoController1.setLooping(true);
-        _videoController1.play();
-      });
-    _videoController2 = VideoPlayerController.asset('assets/womanreading.mp4')
-      ..initialize().then((_) {
-        setState(() {});
-        _videoController2.setLooping(true);
-        _videoController2.play();
+        _videoController.setLooping(true);
+        _videoController.play();
       });
   }
 
   @override
   void dispose() {
-    _videoController1.dispose();
-    _videoController2.dispose();
+    _videoController.dispose();
     super.dispose();
+  }
+
+  void _changeVideo(String url) {
+    _videoController.pause();
+    _videoController = VideoPlayerController.networkUrl(Uri.parse(url))
+      ..initialize().then((_) {
+        setState(() {});
+        _videoController.setLooping(true);
+        _videoController.play();
+      });
   }
 
   @override
@@ -49,12 +51,17 @@ class _IntroScreenState extends State<IntroScreen> {
             onPageChanged: (int page) {
               setState(() {
                 _currentPage = page;
+                if (page == 1) {
+                  _changeVideo('https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/womanoncall.mp4');
+                } else if (page == 2) {
+                  _changeVideo('https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/womanreading.mp4');
+                }
               });
             },
             children: [
-              _buildPageWithImage(context, 'Guided Meditation & Soothing Sounds', 'assets/some.jpeg', 'Explore a library of calming videos and audios designed for your well-being.'),
-              _buildPageWithVideo(context, 'Chat & Call with AI Support', _videoController1, "Our AI assistant is here to support you with thoughtful conversation and guidance"),
-              _buildPageWithVideo(context, 'Pomodoro Task Scheduling', _videoController2, "Set tasks, take mindful breaks, and stay on track with our Pomodoro feature"),
+              _buildPageWithImage(context, 'Guided Meditation & Soothing Sounds', 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/some.jpeg', 'Explore a library of calming videos and audios designed for your well-being.'),
+              _buildPageWithVideo(context, 'Chat & Call with AI Support', _videoController, "Our AI assistant is here to support you with thoughtful conversation and guidance"),
+              _buildPageWithVideo(context, 'Pomodoro Task Scheduling', _videoController, "Set tasks, take mindful breaks, and stay on track with our Pomodoro feature"),
             ],
           ),
           Positioned(
@@ -185,7 +192,7 @@ class _IntroScreenState extends State<IntroScreen> {
           margin: EdgeInsets.only(bottom: 100),
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage(imagePath),
+              image: NetworkImage(imagePath),
               fit: BoxFit.cover,
             ),
           ),
@@ -201,9 +208,9 @@ class _IntroScreenState extends State<IntroScreen> {
                 children: [
                   ConveyorBeltWidget(
                     imageUrls: [
-                      'assets/fingeronwater.jpeg',
-                      'assets/meditationwhite.jpeg',
-                      'assets/flowerstem.jpeg',
+                      'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/fingeronwater.jpeg',
+                      'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/meditationwhite.jpeg',
+                      'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/flowerstem.jpeg',
                     ],
                     height: 100,
                     speedUp: false,
@@ -211,9 +218,9 @@ class _IntroScreenState extends State<IntroScreen> {
                   SizedBox(height: 10),
                   ConveyorBeltWidget(
                     imageUrls: [
-                      'assets/backhandclap.jpeg',
-                      'assets/highleg.jpeg',
-                      'assets/manstandingontop.jpeg',
+                      'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/backhandclap.jpeg',
+                      'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/highleg.jpeg',
+                      'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/manstandingontop.jpeg',
                     ],
                     height: 100,
                     speedUp: true,
@@ -375,5 +382,4 @@ class _IntroScreenState extends State<IntroScreen> {
     );
   }
 }
-
 

@@ -34,7 +34,7 @@ class HomeScreen extends StatelessWidget {
                 Container(
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: AssetImage('assets/manstandingontop.jpeg'),
+                      image: NetworkImage('https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/manstandingontop.jpeg')  ,
                       fit: BoxFit.cover,
                     ),
                   ),

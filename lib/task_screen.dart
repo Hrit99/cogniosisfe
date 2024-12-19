@@ -4,6 +4,9 @@ import 'package:cogniosis/task_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TaskScreen extends StatefulWidget {
   final Task task;
@@ -53,6 +56,82 @@ class _TaskScreenState extends State<TaskScreen> {
     });
   }
 
+  Future<void> _createTask(Task task) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? accessToken = prefs.getString('access_token');
+
+    if (accessToken != null) {
+      final response = await http.post(
+        Uri.parse('https://cogniosisbe-1366da2257bb.herokuapp.com/tasks'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'id': task.id,
+          'is_completed': task.isCompleted,
+          'title': task.title,
+          'duration_minutes': task.duration.inMinutes,
+          'date': task.date.toIso8601String(),
+          'image': task.image,
+          'note': task.note,
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        print('Task created successfully');
+      } else {
+        print('Failed to create task: ${response.body}');
+      }
+    }
+  }
+
+  Future<void> _updateTask(Task task) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? accessToken = prefs.getString('access_token');
+
+    if (accessToken != null) {
+      final response = await http.put(
+        Uri.parse('https://cogniosisbe-1366da2257bb.herokuapp.com/tasks/${task.id}'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'duration_completed_minutes': task.durationCompleted.inMinutes,
+          'note': task.note,
+          'is_completed': task.isCompleted,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('Task updated successfully');
+      } else {
+        print('Failed to update task: ${response.body}');
+      }
+    }
+  }
+
+  Future<void> _deleteTask(Task task) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? accessToken = prefs.getString('access_token');
+
+    if (accessToken != null) {
+      final response = await http.delete(
+        Uri.parse('https://cogniosisbe-1366da2257bb.herokuapp.com/tasks/${task.id}'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Task deleted successfully');
+      } else {
+        print('Failed to delete task: ${response.body}');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -79,11 +158,11 @@ class _TaskScreenState extends State<TaskScreen> {
             child: IconButton(
               icon: Icon(
                 Icons.arrow_back,
-
                 color: themeProvider.isDarkMode ? Colors.white : Colors.black,
               ),
-              onPressed: () {
+              onPressed: () async {
                 widget.task.durationCompleted = totalTime - remainingTime;
+                await _updateTask(widget.task);
                 Provider.of<TaskProvider>(context, listen: false).updateTask(widget.task);
                 Navigator.pop(context);
               },
@@ -180,79 +259,78 @@ class _TaskScreenState extends State<TaskScreen> {
                   children: [
                     Container(
                       width: getWidth(context, 173),
-                     decoration: BoxDecoration(
-                       gradient: RadialGradient(
-                         center: Alignment.center,
-                         radius: 0.5,
-                         colors: [
-                           Color(0xFFE69092),
-                           Color(0xFFBE3D40),
-                         ],
-                         stops: [0.0, 1.0],
-                       ),
-                       borderRadius: BorderRadius.circular(24.0),
-                     ),
-                     child: ElevatedButton(
-                       onPressed: () {
-                        Provider.of<TaskProvider>(context, listen: false).deleteTask(widget.task);
-                        Navigator.pop(context);
-
-                       },
-                       style: ElevatedButton.styleFrom(
-                         shape: RoundedRectangleBorder(
-                           borderRadius: BorderRadius.circular(24),
-                         ),
-                         backgroundColor: Colors.transparent, // Transparent background
-                         shadowColor: Colors.transparent, // Remove shadow
-                       ),
-                       child: Container(
-                        
-                         alignment: Alignment.center,
-                         child: Text(
-                           'Delete',
-                           style: TextStyle(color: themeProvider.isDarkMode ? Colors.black : Colors.white),
-                         ),
-                       ),
-                     ),
-                   ),
-                   SizedBox(width: getWidth(context, 20)),
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          center: Alignment.center,
+                          radius: 0.5,
+                          colors: [
+                            Color(0xFFE69092),
+                            Color(0xFFBE3D40),
+                          ],
+                          stops: [0.0, 1.0],
+                        ),
+                        borderRadius: BorderRadius.circular(24.0),
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          await _deleteTask(widget.task);
+                          Provider.of<TaskProvider>(context, listen: false).deleteTask(widget.task);
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                        ),
+                        child: Container(
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Delete',
+                            style: TextStyle(color: themeProvider.isDarkMode ? Colors.black : Colors.white),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: getWidth(context, 20)),
                     Container(
                       width: getWidth(context, 173),
-                     decoration: BoxDecoration(
-                       gradient: RadialGradient(
-                         center: Alignment.center,
-                         radius: 0.5,
-                         colors: [
-                           Color(0xFF3CC7D4),
-                           Color(0xFF099AA8),
-                         ],
-                         stops: [0.0, 1.0],
-                       ),
-                       borderRadius: BorderRadius.circular(24.0),
-                     ),
-                     child: ElevatedButton(
-                       onPressed: () {
-                         widget.task.isCompleted = true;
-                         Provider.of<TaskProvider>(context, listen: false).updateTask(widget.task);
-                         Navigator.pop(context);
-                       },
-                       style: ElevatedButton.styleFrom(
-                         shape: RoundedRectangleBorder(
-                           borderRadius: BorderRadius.circular(24),
-                         ),
-                         backgroundColor: Colors.transparent, // Transparent background
-                         shadowColor: Colors.transparent, // Remove shadow
-                       ),
-                       child: Container(
-                        
-                         alignment: Alignment.center,
-                         child: Text(
-                           'Completed',
-                           style: TextStyle(color: themeProvider.isDarkMode ? Colors.black : Colors.white),
-                         ),
-                       ),
-                     ),
-                   ),
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          center: Alignment.center,
+                          radius: 0.5,
+                          colors: [
+                            Color(0xFF3CC7D4),
+                            Color(0xFF099AA8),
+                          ],
+                          stops: [0.0, 1.0],
+                        ),
+                        borderRadius: BorderRadius.circular(24.0),
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          widget.task.isCompleted = true;
+                          await _updateTask(widget.task);
+                          Provider.of<TaskProvider>(context, listen: false).updateTask(widget.task);
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                        ),
+                        child: Container(
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Completed',
+                            style: TextStyle(color: themeProvider.isDarkMode ? Colors.black : Colors.white),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ],

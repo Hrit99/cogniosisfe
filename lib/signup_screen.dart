@@ -1,7 +1,12 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:cogniosis/dimensions.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:cogniosis/login_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignupScreen extends StatefulWidget {
   @override
@@ -13,14 +18,15 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   bool _showPassword = false;
   bool _showConfirmPassword = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.asset('assets/yogaman.mp4')
+    _controller = VideoPlayerController.networkUrl(Uri.parse('https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/yogaman.mp4'))
       ..initialize().then((_) {
         setState(() {});
         _controller.play();
@@ -32,6 +38,87 @@ class _SignupScreenState extends State<SignupScreen> {
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<void> _signup() async {
+    final response = await http.post(
+      Uri.parse('https://cogniosisbe-1366da2257bb.herokuapp.com/signup'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'username': _nameController.text,
+        'email': _emailController.text,
+        'password': _passwordController.text,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      // Handle successful signup
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+      );
+    } else {
+      // Handle error
+      print('Failed to sign up: ${response.body}');
+    }
+  }
+
+  Future<void> _signUpWithGoogle() async {
+    try {
+      // Trigger the authentication flow
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+
+      // Create a new credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+
+      // Sign in with Firebase
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+
+      // Get user details
+      final User? user = userCredential.user;
+
+      if (user != null) {
+        // Register user in your database
+        final response = await http.post(
+          Uri.parse('https://cogniosisbe-1366da2257bb.herokuapp.com/register'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(<String, String>{
+            'email': user.email ?? '',
+            'username': user.displayName ?? '',
+            'social_id': user.uid,
+            'provider': 'google',
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          // Store the access token
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('access_token', googleAuth?.accessToken ?? '');
+
+          // Navigate to the HomeScreen
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => LoginScreen()),
+          );
+        } else {
+          // Handle error
+          print('Failed to register user: ${response.body}');
+        }
+      }
+    } catch (e) {
+      // Handle error
+      print('Error signing up with Google: $e');
+    }
   }
 
   @override
@@ -50,7 +137,11 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                 )
-              : Center(child: CircularProgressIndicator()),
+              : Center(child: SizedBox.expand(
+                child: Container(
+                  color: Colors.black,
+                ),
+              )),
           Container(
             color: Colors.black.withOpacity(0.5),
           ),
@@ -94,7 +185,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       ],
                     ),
                   ),
-                  
+
                   // Name Input
                   SizedBox(height: getHeight(context, 20)),
                   TextField(
@@ -102,14 +193,16 @@ class _SignupScreenState extends State<SignupScreen> {
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Name',
-                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+                      hintStyle:
+                          TextStyle(color: Colors.white.withOpacity(0.7)),
                       filled: true,
                       fillColor: Colors.white.withOpacity(0.1),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     ),
                   ),
 
@@ -120,14 +213,16 @@ class _SignupScreenState extends State<SignupScreen> {
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Email address',
-                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+                      hintStyle:
+                          TextStyle(color: Colors.white.withOpacity(0.7)),
                       filled: true,
                       fillColor: Colors.white.withOpacity(0.1),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     ),
                   ),
 
@@ -139,20 +234,25 @@ class _SignupScreenState extends State<SignupScreen> {
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Password',
-                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+                      hintStyle:
+                          TextStyle(color: Colors.white.withOpacity(0.7)),
                       filled: true,
                       fillColor: Colors.white.withOpacity(0.1),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _showPassword ? Icons.visibility : Icons.visibility_off,
+                          _showPassword
+                              ? Icons.visibility
+                              : Icons.visibility_off,
                           color: Colors.white.withOpacity(0.7),
                         ),
-                        onPressed: () => setState(() => _showPassword = !_showPassword),
+                        onPressed: () =>
+                            setState(() => _showPassword = !_showPassword),
                       ),
                     ),
                   ),
@@ -165,20 +265,25 @@ class _SignupScreenState extends State<SignupScreen> {
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Confirm password',
-                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+                      hintStyle:
+                          TextStyle(color: Colors.white.withOpacity(0.7)),
                       filled: true,
                       fillColor: Colors.white.withOpacity(0.1),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _showConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                          _showConfirmPassword
+                              ? Icons.visibility
+                              : Icons.visibility_off,
                           color: Colors.white.withOpacity(0.7),
                         ),
-                        onPressed: () => setState(() => _showConfirmPassword = !_showConfirmPassword),
+                        onPressed: () => setState(
+                            () => _showConfirmPassword = !_showConfirmPassword),
                       ),
                     ),
                   ),
@@ -186,9 +291,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   // Sign Up Button
                   SizedBox(height: 24),
                   ElevatedButton(
-                    onPressed: () {
-                      // Handle signup
-                    },
+                    onPressed: _signup,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF00A9B7),
                       minimumSize: Size(double.infinity, 50),
@@ -221,7 +324,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _socialLoginButton('G', onTap: () {}),
+                      _socialLoginButton('G', onTap: _signUpWithGoogle),
                       SizedBox(width: 16),
                       _socialLoginButton('', icon: Icons.apple, onTap: () {}),
                       SizedBox(width: 16),
@@ -231,31 +334,16 @@ class _SignupScreenState extends State<SignupScreen> {
 
                   // Sign in text
                   SizedBox(height: 24),
-                  RichText(
-                    text: TextSpan(
-                      text: "Already have an account? ",
-                      style: TextStyle(color: Colors.white, fontSize: 14),
+                     
+                     Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        WidgetSpan(
-                          child: TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => LoginScreen()),
-                              );
-                            },
-                            child: Text(
-                              'Sign In',
-                              style: TextStyle(
-                                color: Color(0xFF00A9B7),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
+                        Text("Already have an account? ", style: TextStyle(color: Colors.white, fontSize: 14),),
+                        TextButton(onPressed: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
+                        }, child: Text("Sign In", style: TextStyle(color: Color(0xFF00A9B7), fontWeight: FontWeight.w600,),))
                       ],
-                    ),
-                  ),
+                     )
                 ],
               ),
             ),
@@ -265,7 +353,8 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  Widget _socialLoginButton(String text, {IconData? icon, required VoidCallback onTap}) {
+  Widget _socialLoginButton(String text,
+      {IconData? icon, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -276,7 +365,7 @@ class _SignupScreenState extends State<SignupScreen> {
           borderRadius: BorderRadius.circular(12),
         ),
         child: Center(
-          child: icon != null 
+          child: icon != null
               ? Icon(icon, color: Colors.white, size: 24)
               : Text(
                   text,

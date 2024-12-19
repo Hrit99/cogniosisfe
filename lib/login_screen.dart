@@ -3,6 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:cogniosis/signup_screen.dart';
 import 'package:cogniosis/home_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import 'package:cogniosis/task_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -18,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.asset('assets/yogaman.mp4')
+    _controller = VideoPlayerController.networkUrl(Uri.parse('https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/yogaman.mp4'))
       ..initialize().then((_) {
         // Ensure the first frame is shown after the video is initialized.
         setState(() {});
@@ -31,6 +38,134 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<void> _loginWithGoogle() async {
+    try {
+      // Trigger the authentication flow
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+
+      // Create a new credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+
+      // Sign in with Firebase
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+
+      // Get user details
+      final User? user = userCredential.user;
+
+      if (user != null) {
+        // Check if user is already registered in your database
+        final response = await http.post(
+          Uri.parse('https://cogniosisbe-1366da2257bb.herokuapp.com/login'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(<String, String>{
+            'email': user.email ?? '',
+            'social_id': user.uid,
+            'provider': 'google',
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          // Store the access token
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('access_token', googleAuth?.accessToken ?? '');
+
+          // Fetch tasks and navigate
+          await _fetchTasksAndNavigate();
+        } else {
+          // Handle error
+          print('Failed to log in or register user: ${response.body}');
+        }
+      }
+    } catch (e) {
+      // Handle error
+      print('Error logging in with Google: $e');
+    }
+  }
+
+  Future<void> _login() async {
+    final response = await http.post(
+      Uri.parse('https://cogniosisbe-1366da2257bb.herokuapp.com/login'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'email': _emailController.text,
+        'password': _passwordController.text,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('access_token', responseData['access_token']);
+
+      // Fetch tasks and navigate
+      await _fetchTasksAndNavigate();
+    } else {
+      // Handle error
+      print('Failed to log in: ${response.body}');
+    }
+  }
+
+  Future<void> _fetchTasksAndNavigate() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? accessToken = prefs.getString('access_token');
+
+    if (accessToken != null) {
+      final response = await http.get(
+        Uri.parse('https://cogniosisbe-1366da2257bb.herokuapp.com/tasks'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> taskData = jsonDecode(response.body);
+        final List<Task> tasks = taskData.map((data) {
+          return Task(
+            id: data['id'],
+            title: data['title'],
+            duration: _parseDuration(data['duration']),
+            date: DateTime.parse(data['date']),
+            image: data['image'],
+            durationCompleted: _parseDuration(data['duration_completed']),
+            isCompleted: data['is_completed'],
+            note: data['note'],
+          );
+        }).toList();
+
+        // Update TaskProvider
+        Provider.of<TaskProvider>(context, listen: false).setTasks(tasks);
+
+        // Navigate to the HomeScreen
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+      } else {
+        // Handle error
+        print('Failed to fetch tasks: ${response.body}');
+      }
+    }
+  }
+
+  Duration _parseDuration(String duration) {
+    final parts = duration.split(':');
+    return Duration(
+      hours: int.parse(parts[0]),
+      minutes: int.parse(parts[1]),
+      seconds: int.parse(parts[2]),
+    );
   }
 
   @override
@@ -49,7 +184,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 )
-              : Center(child: CircularProgressIndicator()),
+              : Center(child: SizedBox.expand(
+                child: Container(
+                  color: Colors.black,
+                ),
+              )),
           Container(
             color: Colors.black.withOpacity(0.5), // Black tint overlay
           ),
@@ -140,13 +279,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   
                   // Sign In Button
                   ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => HomeScreen()),
-                      );
-                      // Handle login
-                    },
+                    onPressed: _login,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF00A9B7),
                       minimumSize: Size(double.infinity, 50),
@@ -179,7 +312,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _socialLoginButton('G', onTap: () {}),
+                      _socialLoginButton('G', onTap: _loginWithGoogle),
                       SizedBox(width: 16),
                       _socialLoginButton('', icon: Icons.apple, onTap: () {}),
                       SizedBox(width: 16),
@@ -189,30 +322,34 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: 24),
                   
                   // Sign up text
-                  RichText(
-                    text: TextSpan(
-                      text: "Don't have an account? ",
-                      style: TextStyle(color: Colors.white, fontSize: 14),
-                      children: [
-                        WidgetSpan(
-                          child: TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => SignupScreen()),
-                              );
-                            },
-                            child: Text(
-                              'Signup',
-                              style: TextStyle(
-                                color: Color(0xFF00A9B7),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Don't have an account? ",
+                        style: TextStyle(color: Colors.white, fontSize: 14),
+                      ),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          // backgroundColor: Colors.red,
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => SignupScreen()),
+                          );
+                        },
+                        child: Text(
+                          'Signup',
+                          style: TextStyle(
+                            color: Color(0xFF00A9B7),
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ],
               ),
