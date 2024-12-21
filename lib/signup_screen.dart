@@ -26,7 +26,7 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.networkUrl(Uri.parse('https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/login+(2).mp4'))
+    _controller = VideoPlayerController.asset('assets/login.mp4') 
       ..initialize().then((_) {
         setState(() {});
         _controller.play();

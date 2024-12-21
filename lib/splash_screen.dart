@@ -14,7 +14,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.networkUrl(Uri.parse('https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/splash+(1).mp4'))
+    _controller = VideoPlayerController.asset('assets/splash.mp4')
       ..initialize().then((_) {
         // Ensure the first frame is shown after the video is initialized.
         setState(() {});

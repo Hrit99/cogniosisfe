@@ -264,8 +264,7 @@ class _IntroScreen2State extends State<IntroScreen2>
   @override
   void initState() {
     super.initState();
-    _videoController = VideoPlayerController.networkUrl(Uri.parse(
-        'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/intro2+(1).mp4'))
+    _videoController = VideoPlayerController.asset('assets/intro2.mp4')
       ..setLooping(true);
     _initializeVideoPlayerFuture = _videoController.initialize().then((_) {
       setState(() {});
@@ -454,8 +453,7 @@ class _IntroScreen2State extends State<IntroScreen2>
         Positioned(
           top: 0,
           child: Container(
-            color: Colors.red,
-            height: MediaQuery.of(context).size.height / 1.4,
+            height: MediaQuery.of(context).size.height / 1.6,
             width: MediaQuery.of(context).size.width * 1.8,
             margin: EdgeInsets.only(bottom: 100), // Only margin at the bottom
             child: ClipRect(
@@ -493,12 +491,12 @@ class _IntroScreen2State extends State<IntroScreen2>
               Colors.black,
             ],
             stops: [
-              200 /
+              250 /
                   MediaQueryData.fromView(WidgetsBinding
                           .instance.platformDispatcher.views.first)
                       .size
                       .height,
-              0.7
+              0.6
             ],
           ),
         ),
@@ -538,8 +536,7 @@ class _IntroScreen3State extends State<IntroScreen3>
   @override
   void initState() {
     super.initState();
-    _videoController = VideoPlayerController.networkUrl(Uri.parse(
-        'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/intro3+(2).mp4'))
+    _videoController = VideoPlayerController.asset('assets/intro3.mp4')
       ..setLooping(true);
     _initializeVideoPlayerFuture = _videoController.initialize().then((_) {
       setState(() {});

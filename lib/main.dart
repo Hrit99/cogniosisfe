@@ -127,7 +127,6 @@ class ErrorMessage extends StatelessWidget {
     );
   }
 }
-
 class MyHomePage extends StatefulWidget {
   final String title;
   final bool isDarkMode;
@@ -263,6 +262,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void dispose() {
     _audioPlayer.dispose();
     _audioRecorder.dispose();
+    _tunePlayer.dispose(); // Dispose the tune player
     super.dispose();
   }
 
@@ -294,6 +294,20 @@ class _MyHomePageState extends State<MyHomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _connect();
     });
+
+    // Play the tune repeatedly when the screen is rendered
+    _playTune();
+  }
+
+  final AudioPlayer _tunePlayer = AudioPlayer();
+
+  void _playTune() async {
+    await _tunePlayer.setReleaseMode(ReleaseMode.loop);
+    await _tunePlayer.play(AssetSource('tune.mp3'));
+  }
+
+  void _stopTune() {
+    _tunePlayer.stop();
   }
 
   // Opens a websocket connection to the EVI API and registers a listener to handle
@@ -310,7 +324,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     var uri = 'wss://api.hume.ai/v0/evi/chat';
     if (ConfigManager.instance.humeAccessToken.isNotEmpty) {
-      uri += '?access_token=${ConfigManager.instance.humeAccessToken}';
+      uri += '?access_token=${ConfigManager.instance.humeAccessToken}&config_id=${ConfigManager.instance.humeConfigId}';
     } else if (ConfigManager.instance.humeApiKey.isNotEmpty) {
       print(
           "ConfigManager.instance.humeApiKey: ${ConfigManager.instance.humeApiKey}");
@@ -327,6 +341,8 @@ class _MyHomePageState extends State<MyHomePage> {
       (event) async {
         final message = evi.EviMessage.decode(event);
         debugPrint("Received message: ${message.type}");
+        // Stop the tune when a message is received
+        _stopTune();
         // This message contains audio data for playback.
         switch (message) {
           case (evi.ErrorMessage errorMessage):
