@@ -23,6 +23,12 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _showPassword = false;
 
   @override
+  void deactivate() {
+    _controller.pause();
+    super.deactivate();
+  }
+
+  @override
   void initState() {
     super.initState();
     _controller = VideoPlayerController.asset('assets/login.mp4') 
@@ -148,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Provider.of<TaskProvider>(context, listen: false).setTasks(tasks);
 
         // Navigate to the HomeScreen
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => HomeScreen()),
         );
@@ -336,7 +342,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           // backgroundColor: Colors.red,
                         ),
                         onPressed: () {
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(builder: (context) => SignupScreen()),
                           );

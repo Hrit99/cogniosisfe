@@ -35,6 +35,12 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   @override
+  void deactivate() {
+    _controller.pause();
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -55,7 +61,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
     if (response.statusCode == 201) {
       // Handle successful signup
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => LoginScreen()),
       );
@@ -106,7 +112,7 @@ class _SignupScreenState extends State<SignupScreen> {
           await prefs.setString('access_token', googleAuth?.accessToken ?? '');
 
           // Navigate to the HomeScreen
-          Navigator.push(
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => LoginScreen()),
           );
@@ -124,231 +130,238 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          _controller.value.isInitialized
-              ? SizedBox.expand(
-                  child: FittedBox(
-                    fit: BoxFit.cover,
-                    child: SizedBox(
-                      width: _controller.value.size.width,
-                      height: _controller.value.size.height,
-                      child: VideoPlayer(_controller),
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: Stack(
+          children: [
+            _controller.value.isInitialized
+                ? SizedBox.expand(
+                    child: FittedBox(
+                      fit: BoxFit.cover,
+                      child: SizedBox(
+                        width: _controller.value.size.width,
+                        height: _controller.value.size.height,
+                        child: VideoPlayer(_controller),
+                      ),
                     ),
+                  )
+                : Center(child: SizedBox.expand(
+                  child: Container(
+                    color: Colors.black,
                   ),
-                )
-              : Center(child: SizedBox.expand(
-                child: Container(
-                  color: Colors.black,
-                ),
-              )),
-          Container(
-            color: Colors.black.withOpacity(0.5),
-          ),
-          Positioned(
-            top: 77.0,
-            left: 0,
-            right: 0,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Visibility(
-                    visible: MediaQuery.of(context).viewInsets.bottom == 0,
-                    child: Column(
-                      children: [
-                        Image.asset(
-                          'assets/splashscreenicon.png',
-                          width: getWidth(context, 141),
-                          height: getHeight(context, 44),
-                          fit: BoxFit.cover,
-                        ),
-                        SizedBox(height: getHeight(context, 10)),
-                        Container(
-                          width: getWidth(context, 92),
-                          height: getHeight(context, 32),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(36),
-                            color: Colors.white.withOpacity(0.0),
+                )),
+            Container(
+              color: Colors.black.withOpacity(0.5),
+            ),
+            Positioned(
+              top: getHeight(context, 77),
+              left: 0,
+              right: 0,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: getWidth(context, 24)),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Visibility(
+                      visible: MediaQuery.of(context).viewInsets.bottom == 0,
+                      child: Column(
+                        children: [
+                          Image.asset(
+                            'assets/splashscreenicon.png',
+                            width: getWidth(context, 141),
+                            height: getHeight(context, 44),
+                            fit: BoxFit.cover,
                           ),
-                          child: Center(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Image.asset('assets/circle-mic.png'),
-                                SizedBox(width: getWidth(context, 1)),
-                              ],
+                          SizedBox(height: getHeight(context, 10)),
+                          Container(
+                            width: getWidth(context, 92),
+                            height: getHeight(context, 32),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(36),
+                              color: Colors.white.withOpacity(0.0),
+                            ),
+                            child: Center(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset('assets/circle-mic.png'),
+                                  SizedBox(width: getWidth(context, 1)),
+                                ],
+                              ),
                             ),
                           ),
+                        ],
+                      ),
+                    ),
+
+                    // Name Input
+                    SizedBox(height: getHeight(context, 20)),
+                    TextField(
+                      controller: _nameController,
+                      style: TextStyle(color: Colors.white, fontSize: getHeight(context, 12)),
+                      decoration: InputDecoration(
+                        hintText: 'Name',
+                        hintStyle:
+                            TextStyle(color: Colors.white.withOpacity(0.7)),
+                        filled: true,
+                        fillColor: Colors.white.withOpacity(0.1),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide.none,
                         ),
-                      ],
-                    ),
-                  ),
-
-                  // Name Input
-                  SizedBox(height: getHeight(context, 20)),
-                  TextField(
-                    controller: _nameController,
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: 'Name',
-                      hintStyle:
-                          TextStyle(color: Colors.white.withOpacity(0.7)),
-                      filled: true,
-                      fillColor: Colors.white.withOpacity(0.1),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                       ),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     ),
-                  ),
 
-                  // Email Input
-                  SizedBox(height: 16),
-                  TextField(
-                    controller: _emailController,
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: 'Email address',
-                      hintStyle:
-                          TextStyle(color: Colors.white.withOpacity(0.7)),
-                      filled: true,
-                      fillColor: Colors.white.withOpacity(0.1),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                    ),
-                  ),
-
-                  // Password Input
-                  SizedBox(height: 16),
-                  TextField(
-                    controller: _passwordController,
-                    obscureText: !_showPassword,
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: 'Password',
-                      hintStyle:
-                          TextStyle(color: Colors.white.withOpacity(0.7)),
-                      filled: true,
-                      fillColor: Colors.white.withOpacity(0.1),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _showPassword
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                          color: Colors.white.withOpacity(0.7),
+                    // Email Input
+                    SizedBox(height: 16),
+                    TextField(
+                      controller: _emailController,
+                      style: TextStyle(color: Colors.white, fontSize: getHeight(context, 12)),
+                      decoration: InputDecoration(
+                        hintText: 'Email address',
+                        hintStyle:
+                            TextStyle(color: Colors.white.withOpacity(0.7)),
+                        filled: true,
+                        fillColor: Colors.white.withOpacity(0.1),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide.none,
                         ),
-                        onPressed: () =>
-                            setState(() => _showPassword = !_showPassword),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                       ),
                     ),
-                  ),
 
-                  // Confirm Password Input
-                  SizedBox(height: 16),
-                  TextField(
-                    controller: _confirmPasswordController,
-                    obscureText: !_showConfirmPassword,
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: 'Confirm password',
-                      hintStyle:
-                          TextStyle(color: Colors.white.withOpacity(0.7)),
-                      filled: true,
-                      fillColor: Colors.white.withOpacity(0.1),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _showConfirmPassword
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                          color: Colors.white.withOpacity(0.7),
+                    // Password Input
+                    SizedBox(height: 16),
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: !_showPassword,
+                      style: TextStyle(color: Colors.white, fontSize: getHeight(context, 12)),
+                      decoration: InputDecoration(
+                        hintText: 'Password',
+                        hintStyle:
+                            TextStyle(color: Colors.white.withOpacity(0.7)),
+                        filled: true,
+                        fillColor: Colors.white.withOpacity(0.1),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide.none,
                         ),
-                        onPressed: () => setState(
-                            () => _showConfirmPassword = !_showConfirmPassword),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _showPassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.white.withOpacity(0.7),
+                          ),
+                          onPressed: () =>
+                              setState(() => _showPassword = !_showPassword),
+                        ),
                       ),
                     ),
-                  ),
 
-                  // Sign Up Button
-                  SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: _signup,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF00A9B7),
-                      minimumSize: Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                    // Confirm Password Input
+                    SizedBox(height: 16),
+                    TextField(
+                      controller: _confirmPasswordController,
+                      obscureText: !_showConfirmPassword,
+                      style: TextStyle(color: Colors.white, fontSize: getHeight(context, 12)),
+                      decoration: InputDecoration(
+                        hintText: 'Confirm password',
+                        hintStyle:
+                            TextStyle(color: Colors.white.withOpacity(0.7)),
+                        filled: true,
+                        fillColor: Colors.white.withOpacity(0.1),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _showConfirmPassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.white.withOpacity(0.7),
+                          ),
+                          onPressed: () => setState(
+                              () => _showConfirmPassword = !_showConfirmPassword),
+                        ),
                       ),
                     ),
-                    child: Text(
-                      'Sign Up',
+
+                    // Sign Up Button
+                    SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: _signup,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF00A9B7),
+                        minimumSize: Size(double.infinity, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      child: Text(
+                        'Sign Up',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+
+                    // Or signup with text
+                    SizedBox(height: 24),
+                    Text(
+                      'Or signup with',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
                       ),
                     ),
-                  ),
 
-                  // Or signup with text
-                  SizedBox(height: 24),
-                  Text(
-                    'Or signup with',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                    ),
-                  ),
 
-                  // Social signup buttons
-                  SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _socialLoginButton('G', onTap: _signUpWithGoogle),
-                      SizedBox(width: 16),
-                      _socialLoginButton('', icon: Icons.apple, onTap: () {}),
-                      SizedBox(width: 16),
-                      _socialLoginButton('f', onTap: () {}),
-                    ],
-                  ),
 
-                  // Sign in text
-                  SizedBox(height: 24),
-                     
-                     Row(
+                    // Social signup buttons
+                    SizedBox(height: 16),
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("Already have an account? ", style: TextStyle(color: Colors.white, fontSize: 14),),
-                        TextButton(onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
-                        }, child: Text("Sign In", style: TextStyle(color: Color(0xFF00A9B7), fontWeight: FontWeight.w600,),))
+                        _socialLoginButton('G', onTap: _signUpWithGoogle),
+                        SizedBox(width: 16),
+                        _socialLoginButton('', icon: Icons.apple, onTap: () {}),
+                        SizedBox(width: 16),
+                        _socialLoginButton('f', onTap: () {}),
                       ],
-                     )
-                ],
+                    ),
+
+                    // Sign in text
+                    SizedBox(height: 24),
+                       
+                       Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("Already have an account? ", style: TextStyle(color: Colors.white, fontSize: 14),),
+                          TextButton(onPressed: () {
+                            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginScreen()));
+                          }, child: Text("Sign In", style: TextStyle(color: Color(0xFF00A9B7), fontWeight: FontWeight.w600,),))
+                        ],
+                       )
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

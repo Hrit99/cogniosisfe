@@ -40,268 +40,273 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: widget.isDarkMode ? Color(0xFF0D1314) : Colors.grey[200],
-      body: SafeArea(
-        child:  SingleChildScrollView(
-          child: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.only(
-                  right: getWidth(context, 200),
-                  left: getWidth(context, 10),
-                  top: getHeight(context, 30),
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(
+                    right: getWidth(context, 200),
+                    left: getWidth(context, 10),
+                    top: getHeight(context, 30),
+                  ),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.arrow_back),
+                        color: widget.isDarkMode ? Colors.white : Colors.black,
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      Expanded(
+                        child: Text(
+                          'Add Task',
+                          style: TextStyle(
+                            color: widget.isDarkMode ? Colors.white : Colors.black,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.arrow_back),
+                SizedBox(height: getHeight(context, 30)),
+                // Add your additional widgets here
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: getWidth(context, 20)),
+                  child: TextField(
+                    controller: _nameController,
+                    style: TextStyle(
                       color: widget.isDarkMode ? Colors.white : Colors.black,
-                      onPressed: () => Navigator.pop(context),
+                      fontSize: getHeight(context, 16),
+                      fontFamily: 'Satoshi'
                     ),
-                    Expanded(
-                      child: Text(
-                        'Add Task',
+                    decoration: InputDecoration(
+                      hintText: 'name',
+                      hintStyle: TextStyle(
+                        color: widget.isDarkMode ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
+                      ),
+                      filled: true,
+                      fillColor: widget.isDarkMode ? Color(0xFF292B2A) : Colors.grey[300],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: EdgeInsets.symmetric(horizontal: getWidth(context, 20), vertical: getHeight(context, 16)),
+                    ),
+                  ),
+                ),
+                SizedBox(height: getHeight(context, 20)),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: getWidth(context, 20), vertical: getHeight(context, 10)),
+                  child: GestureDetector(
+                    onTap: () async {
+                      DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2101),
+                      );
+                      if (pickedDate != null) {
+                        setState(() {
+                          _selectedDate = pickedDate;
+                          _dateController.text = _selectedDate.toString().split(' ')[0];
+                        });
+                      }
+                    },
+                    child: AbsorbPointer(
+                      child: TextField(
+                        controller: _dateController,
                         style: TextStyle(
                           color: widget.isDarkMode ? Colors.white : Colors.black,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
+                          fontSize: getHeight(context, 16),
+                          fontFamily: 'Satoshi'
                         ),
-                        textAlign: TextAlign.center,
+                        decoration: InputDecoration(
+                          hintText: 'Set Date (e.g., 2023-12-31)',
+                          hintStyle: TextStyle(
+                            color: widget.isDarkMode ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
+                          ),
+                          filled: true,
+                          fillColor: widget.isDarkMode ? Color(0xFF292B2A) : Colors.grey[300],
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: EdgeInsets.symmetric(horizontal: getWidth(context, 20), vertical: getHeight(context, 16)),
+                        ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              SizedBox(height: getHeight(context, 30)),
-              // Add your additional widgets here
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: getWidth(context, 20)),
-                child: TextField(
-                  controller: _nameController,
-                  style: TextStyle(
-                    color: widget.isDarkMode ? Colors.white : Colors.black,
-                    fontSize: getHeight(context, 16),
-                    fontFamily: 'Satoshi'
-                  ),
-                  decoration: InputDecoration(
-                    hintText: 'name',
-                    hintStyle: TextStyle(
-                      color: widget.isDarkMode ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
-                    ),
-                    filled: true,
-                    fillColor: widget.isDarkMode ? Color(0xFF292B2A) : Colors.grey[300],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: EdgeInsets.symmetric(horizontal: getWidth(context, 20), vertical: getHeight(context, 16)),
                   ),
                 ),
-              ),
-              SizedBox(height: getHeight(context, 20)),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: getWidth(context, 20), vertical: getHeight(context, 10)),
-                child: GestureDetector(
-                  onTap: () async {
-                    DateTime? pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2101),
-                    );
-                    if (pickedDate != null) {
-                      setState(() {
-                        _selectedDate = pickedDate;
-                        _dateController.text = _selectedDate.toString().split(' ')[0];
-                      });
-                    }
-                  },
-                  child: AbsorbPointer(
-                    child: TextField(
-                      controller: _dateController,
-                      style: TextStyle(
-                        color: widget.isDarkMode ? Colors.white : Colors.black,
-                        fontSize: getHeight(context, 16),
-                        fontFamily: 'Satoshi'
+                SizedBox(height: getHeight(context, 20)),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: getWidth(context, 20), vertical: getHeight(context, 10)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text(
+                              'Hour',
+                              style: TextStyle(
+                                color: widget.isDarkMode ? Colors.white : Colors.black,
+                                fontSize: getHeight(context, 16),
+                                fontFamily: 'Satoshi'
+                              ),
+                            ),
+                            SizedBox(height: getHeight(context, 5)),
+                            Container(
+                              height: getHeight(context, 100),
+                              child: ListWheelScrollView.useDelegate(
+                                itemExtent: 40,
+                                diameterRatio: 1.2,
+                                physics: FixedExtentScrollPhysics(),
+                                onSelectedItemChanged: (index) {
+                                  _hours = index;
+                                },
+                                childDelegate: ListWheelChildBuilderDelegate(
+                                  builder: (context, index) {
+                                    return Center(
+                                      child: Text(
+                                        index.toString().padLeft(2, '0'),
+                                        style: TextStyle(
+                                          color: widget.isDarkMode ? Colors.white : Colors.black,
+                                          fontSize: getHeight(context, 24),
+                                          fontFamily: 'Satoshi'
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  childCount: 24,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text(
+                              'Minutes',
+                              style: TextStyle(
+                                color: widget.isDarkMode ? Colors.white : Colors.black,
+                                fontSize: getHeight(context, 16),
+                                fontFamily: 'Satoshi'
+                              ),
+                            ),
+                            Container(
+                              height: getHeight(context, 100),
+                              child: ListWheelScrollView.useDelegate(
+                                itemExtent: 40,
+                                diameterRatio: 1.2,
+                                physics: FixedExtentScrollPhysics(),
+                                onSelectedItemChanged: (index) {
+                                  _minutes = index;
+                                },
+                                childDelegate: ListWheelChildBuilderDelegate(
+                                  builder: (context, index) {
+                                    return Center(
+                                      child: Text(
+                                        index.toString().padLeft(2, '0'),
+                                        style: TextStyle(
+                                          color: widget.isDarkMode ? Colors.white : Colors.black,
+                                          fontSize: getHeight(context, 24),
+                                          fontFamily: 'Satoshi'
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  childCount: 60,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text(
+                              'Seconds',
+                              style: TextStyle(
+                                color: widget.isDarkMode ? Colors.white : Colors.black,
+                                fontSize: getHeight(context, 16),
+                                fontFamily: 'Satoshi'
+                              ),
+                            ),
+                            Container(
+                              height: getHeight(context, 100),
+                              child: ListWheelScrollView.useDelegate(
+                                itemExtent: 40,
+                                diameterRatio: 1.2,
+                                physics: FixedExtentScrollPhysics(),
+                                onSelectedItemChanged: (index) {
+                                  _seconds = index;
+                                },
+                                childDelegate: ListWheelChildBuilderDelegate(
+                                  builder: (context, index) {
+                                    return Center(
+                                      child: Text(
+                                        index.toString().padLeft(2, '0'),
+                                        style: TextStyle(
+                                          color: widget.isDarkMode ? Colors.white : Colors.black,
+                                          fontSize: getHeight(context, 24),
+                                          fontFamily: 'Satoshi'
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  childCount: 60,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: getHeight(context, 20)),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: getWidth(context, 20), vertical: getHeight(context, 10)),
+                  child: TextField(
+                    controller: _noteController,
+                    maxLines: 3,
+                    style: TextStyle(
+                      color: widget.isDarkMode ? Colors.white : Colors.black,
+                      fontSize: getHeight(context, 16),
+                      fontFamily: 'Satoshi'
+                    ),
                       decoration: InputDecoration(
-                        hintText: 'Set Date (e.g., 2023-12-31)',
-                        hintStyle: TextStyle(
-                          color: widget.isDarkMode ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
-                        ),
-                        filled: true,
-                        fillColor: widget.isDarkMode ? Color(0xFF292B2A) : Colors.grey[300],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: EdgeInsets.symmetric(horizontal: getWidth(context, 20), vertical: getHeight(context, 16)),
+                      hintText: 'Add a note',
+                      hintStyle: TextStyle(
+                        color: widget.isDarkMode ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
+                      ),
+                      filled: true,
+                      fillColor: widget.isDarkMode ? Color(0xFF292B2A) : Colors.white.withOpacity(0.1),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
                       ),
                     ),
+                    onChanged: (value) {
+                      setState(() {
+                        // Handle note input
+                      });
+                    },
                   ),
                 ),
-              ),
-              SizedBox(height: getHeight(context, 20)),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: getWidth(context, 20), vertical: getHeight(context, 10)),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Text(
-                            'Hour',
-                            style: TextStyle(
-                              color: widget.isDarkMode ? Colors.white : Colors.black,
-                              fontSize: getHeight(context, 16),
-                              fontFamily: 'Satoshi'
-                            ),
-                          ),
-                          SizedBox(height: getHeight(context, 5)),
-                          Container(
-                            height: getHeight(context, 100),
-                            child: ListWheelScrollView.useDelegate(
-                              itemExtent: 40,
-                              diameterRatio: 1.2,
-                              physics: FixedExtentScrollPhysics(),
-                              onSelectedItemChanged: (index) {
-                                _hours = index;
-                              },
-                              childDelegate: ListWheelChildBuilderDelegate(
-                                builder: (context, index) {
-                                  return Center(
-                                    child: Text(
-                                      index.toString().padLeft(2, '0'),
-                                      style: TextStyle(
-                                        color: widget.isDarkMode ? Colors.white : Colors.black,
-                                        fontSize: getHeight(context, 24),
-                                        fontFamily: 'Satoshi'
-                                      ),
-                                    ),
-                                  );
-                                },
-                                childCount: 24,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Text(
-                            'Minutes',
-                            style: TextStyle(
-                              color: widget.isDarkMode ? Colors.white : Colors.black,
-                              fontSize: getHeight(context, 16),
-                              fontFamily: 'Satoshi'
-                            ),
-                          ),
-                          Container(
-                            height: getHeight(context, 100),
-                            child: ListWheelScrollView.useDelegate(
-                              itemExtent: 40,
-                              diameterRatio: 1.2,
-                              physics: FixedExtentScrollPhysics(),
-                              onSelectedItemChanged: (index) {
-                                _minutes = index;
-                              },
-                              childDelegate: ListWheelChildBuilderDelegate(
-                                builder: (context, index) {
-                                  return Center(
-                                    child: Text(
-                                      index.toString().padLeft(2, '0'),
-                                      style: TextStyle(
-                                        color: widget.isDarkMode ? Colors.white : Colors.black,
-                                        fontSize: getHeight(context, 24),
-                                        fontFamily: 'Satoshi'
-                                      ),
-                                    ),
-                                  );
-                                },
-                                childCount: 60,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Text(
-                            'Seconds',
-                            style: TextStyle(
-                              color: widget.isDarkMode ? Colors.white : Colors.black,
-                              fontSize: getHeight(context, 16),
-                              fontFamily: 'Satoshi'
-                            ),
-                          ),
-                          Container(
-                            height: getHeight(context, 100),
-                            child: ListWheelScrollView.useDelegate(
-                              itemExtent: 40,
-                              diameterRatio: 1.2,
-                              physics: FixedExtentScrollPhysics(),
-                              onSelectedItemChanged: (index) {
-                                _seconds = index;
-                              },
-                              childDelegate: ListWheelChildBuilderDelegate(
-                                builder: (context, index) {
-                                  return Center(
-                                    child: Text(
-                                      index.toString().padLeft(2, '0'),
-                                      style: TextStyle(
-                                        color: widget.isDarkMode ? Colors.white : Colors.black,
-                                        fontSize: getHeight(context, 24),
-                                        fontFamily: 'Satoshi'
-                                      ),
-                                    ),
-                                  );
-                                },
-                                childCount: 60,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: getHeight(context, 20)),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: getWidth(context, 20), vertical: getHeight(context, 10)),
-                child: TextField(
-                  controller: _noteController,
-                  maxLines: 3,
-                  style: TextStyle(
-                    color: widget.isDarkMode ? Colors.white : Colors.black,
-                    fontSize: getHeight(context, 16),
-                    fontFamily: 'Satoshi'
-                  ),
-                    decoration: InputDecoration(
-                    hintText: 'Add a note',
-                    hintStyle: TextStyle(
-                      color: widget.isDarkMode ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
-                    ),
-                    filled: true,
-                    fillColor: widget.isDarkMode ? Color(0xFF292B2A) : Colors.white.withOpacity(0.1),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                  onChanged: (value) {
-                    setState(() {
-                      // Handle note input
-                    });
-                  },
-                ),
-              ),
-              // Add other fields and buttons as needed
-            ],
+                // Add other fields and buttons as needed
+              ],
+            ),
           ),
         ),
       ),

@@ -1,6 +1,5 @@
 import 'package:cogniosis/dimensions.dart';
 import 'package:cogniosis/intro_screen.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -30,15 +29,21 @@ class _SplashScreenState extends State<SplashScreen> {
     super.dispose();
   }
 
+  @override
+  void deactivate() {
+    _controller.pause(); // Pause the video when navigating away
+    super.deactivate();
+  }
+
   void _navigateToSignUp(BuildContext context) {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => IntroScreen1()),
     );
   }
 
   void _navigateToLogin(BuildContext context) {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => IntroScreen1()),
     );
@@ -164,12 +169,6 @@ class _SplashScreenState extends State<SplashScreen> {
                       ),
                     ),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      FirebaseCrashlytics.instance.crash();
-                    },
-                    child: Text('Test Crash'),
-                  )
                 ],
               ),
             ),

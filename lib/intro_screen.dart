@@ -11,6 +11,7 @@ class IntroScreen1 extends StatefulWidget {
 }
 
 class _IntroScreen1State extends State<IntroScreen1> {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,10 +19,10 @@ class _IntroScreen1State extends State<IntroScreen1> {
         onHorizontalDragUpdate: (details) {
           if (details.primaryDelta! > 0) {
             print('Dragging right');
-            Navigator.push(context, _createRoute(SplashScreen(), Offset(1, 0)));
+            Navigator.pushReplacement(context, _createRoute(SplashScreen(), Offset(1, 0)));
           } else if (details.primaryDelta! < 0) {
             print('Dragging left');
-            Navigator.push(context, _createRoute(IntroScreen2(), Offset(1, 0)));
+            Navigator.pushReplacement(context, _createRoute(IntroScreen2(), Offset(1, 0)));
           }
         },
         child: Stack(
@@ -43,7 +44,7 @@ class _IntroScreen1State extends State<IntroScreen1> {
                   children: [
                     TextButton(
                       onPressed: () {
-                        Navigator.push(context,
+                        Navigator.pushReplacement(context,
                             _createRoute(LoginScreen(), Offset(-1, 0)));
                       },
                       child: Text(
@@ -69,7 +70,7 @@ class _IntroScreen1State extends State<IntroScreen1> {
                       },
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.push(context,
+                          Navigator.pushReplacement(context,
                               _createRoute(IntroScreen2(), Offset(1, 0)));
                         },
                         style: ElevatedButton.styleFrom(
@@ -279,16 +280,22 @@ class _IntroScreen2State extends State<IntroScreen2>
   }
 
   @override
+  void deactivate() {
+    _videoController.pause();
+    super.deactivate();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: GestureDetector(
         onHorizontalDragUpdate: (details) {
           if (details.primaryDelta! > 0) {
             print('Dragging right');
-            Navigator.push(context, _createRoute(IntroScreen1(), Offset(1, 0)));
+            Navigator.pushReplacement(context, _createRoute(IntroScreen1(), Offset(1, 0)));
           } else if (details.primaryDelta! < 0) {
             print('Dragging left');
-            Navigator.push(context, _createRoute(IntroScreen3(), Offset(1, 0)));
+            Navigator.pushReplacement(context, _createRoute(IntroScreen3(), Offset(1, 0)));
           }
         },
         child: Stack(
@@ -395,7 +402,7 @@ class _IntroScreen2State extends State<IntroScreen2>
                   children: [
                     TextButton(
                       onPressed: () {
-                        Navigator.push(context,
+                        Navigator.pushReplacement(context,
                             _createRoute(LoginScreen(), Offset(-1, 0)));
                       },
                       child: Text(
@@ -421,7 +428,7 @@ class _IntroScreen2State extends State<IntroScreen2>
                       },
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.push(context,
+                          Navigator.pushReplacement(context,
                               _createRoute(IntroScreen3(), Offset(1, 0)));
                         },
                         style: ElevatedButton.styleFrom(
@@ -534,6 +541,13 @@ class _IntroScreen3State extends State<IntroScreen3>
   late Future<void> _initializeVideoPlayerFuture;
 
   @override
+  void deactivate() {
+    _videoController.pause();
+    super.deactivate();
+  }
+  
+
+  @override
   void initState() {
     super.initState();
     _videoController = VideoPlayerController.asset('assets/intro3.mp4')
@@ -557,10 +571,10 @@ class _IntroScreen3State extends State<IntroScreen3>
         onHorizontalDragUpdate: (details) {
           if (details.primaryDelta! > 0) {
             print('Dragging right');
-            Navigator.push(context, _createRoute(IntroScreen2(), Offset(1, 0)));
+            Navigator.pushReplacement(context, _createRoute(IntroScreen2(), Offset(1, 0)));
           } else if (details.primaryDelta! < 0) {
             print('Dragging left');
-            Navigator.push(context, _createRoute(LoginScreen(), Offset(1, 0)));
+            Navigator.pushReplacement(context, _createRoute(LoginScreen(), Offset(1, 0)));
           }
         },
         child: Stack(
@@ -660,7 +674,7 @@ class _IntroScreen3State extends State<IntroScreen3>
                   children: [
                     TextButton(
                       onPressed: () {
-                        Navigator.push(context,
+                        Navigator.pushReplacement(context,
                             _createRoute(LoginScreen(), Offset(-1, 0)));
                       },
                       child: Text(
@@ -686,7 +700,7 @@ class _IntroScreen3State extends State<IntroScreen3>
                       },
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.push(context,
+                          Navigator.pushReplacement(context,
                               _createRoute(LoginScreen(), Offset(1, 0)));
                         },
                         style: ElevatedButton.styleFrom(
