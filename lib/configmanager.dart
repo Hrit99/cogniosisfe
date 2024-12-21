@@ -49,10 +49,10 @@ class ConfigManager {
     // await dotenv.load();
 
     // // WARNING! For development only.
-    humeApiKey = fetchHumeApiKey();
+    // humeApiKey = fetchHumeApiKey();
 
     // Uncomment this to use an access token in production.
-    // humeAccessToken = await fetchAccessToken();
+    humeAccessToken = await fetchAccessToken();
     humeConfigId = '2d1e72a4-7143-4739-8cfa-d4ff67b57f7a';
   }
 }

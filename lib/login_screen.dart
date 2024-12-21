@@ -25,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.networkUrl(Uri.parse('https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/yogaman.mp4'))
+    _controller = VideoPlayerController.networkUrl(Uri.parse('https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/login+(2).mp4'))
       ..initialize().then((_) {
         // Ensure the first frame is shown after the video is initialized.
         setState(() {});

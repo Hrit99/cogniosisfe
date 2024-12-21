@@ -14,7 +14,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.networkUrl(Uri.parse('https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/splashscreenbg.mp4'))
+    _controller = VideoPlayerController.networkUrl(Uri.parse('https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/splash+(1).mp4'))
       ..initialize().then((_) {
         // Ensure the first frame is shown after the video is initialized.
         setState(() {});
@@ -32,14 +32,14 @@ class _SplashScreenState extends State<SplashScreen> {
   void _navigateToSignUp(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => IntroScreen()),
+      MaterialPageRoute(builder: (context) => IntroScreen1()),
     );
   }
 
   void _navigateToLogin(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => IntroScreen()),
+      MaterialPageRoute(builder: (context) => IntroScreen1()),
     );
   }
 
@@ -60,7 +60,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                 )
               : SizedBox.expand(
-                  child: Center(child: Container(color: Colors.white,)),
+                  child: Center(child: Container(color: Color(0xFF1D2122),)),
                 ),
           Center(
             child: Column(

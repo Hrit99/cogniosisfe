@@ -1,9 +1,11 @@
 import 'package:cogniosis/dimensions.dart';
+import 'package:cogniosis/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cogniosis/expandable_widget.dart'; // Import the expandable widget
 import 'package:cogniosis/listing_widget.dart'; // Import the listing widget
 // Import the task provider
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeProvider with ChangeNotifier {
   bool _isDarkMode = false;
@@ -24,11 +26,26 @@ class ThemeProvider with ChangeNotifier {
 }
 
 class HomeScreen extends StatelessWidget {
+
+  Future<SharedPreferences> _getSharedPreferences() async {
+    return await SharedPreferences.getInstance();
+  }
+
   @override
   Widget build(BuildContext context) {
-
     final themeProvider = Provider.of<ThemeProvider>(context);
-    return Scaffold(
+
+    return FutureBuilder<SharedPreferences>(
+      future: _getSharedPreferences(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator(); // Show a loading indicator while waiting
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error loading preferences'));
+        } else {
+          final prefs = snapshot.data;
+          // Use prefs as needed
+          return Scaffold(
             body: Stack(
               children: [
                 Container(
@@ -106,6 +123,8 @@ class HomeScreen extends StatelessWidget {
                                             : Colors.black,
                                       ),
                                       onPressed: () {
+                                        prefs?.clear();
+                                        Navigator.push(context, MaterialPageRoute(builder: (context) => SplashScreen()));
                                         // Add settings button functionality here
                                       },
                                     ),
@@ -231,6 +250,8 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
           );
-        
+        }
+      },
+    );
   }
 }

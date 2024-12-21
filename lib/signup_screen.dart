@@ -26,7 +26,7 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.networkUrl(Uri.parse('https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/yogaman.mp4'))
+    _controller = VideoPlayerController.networkUrl(Uri.parse('https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/login+(2).mp4'))
       ..initialize().then((_) {
         setState(() {});
         _controller.play();
@@ -53,7 +53,7 @@ class _SignupScreenState extends State<SignupScreen> {
       }),
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 201) {
       // Handle successful signup
       Navigator.push(
         context,
@@ -99,7 +99,7 @@ class _SignupScreenState extends State<SignupScreen> {
             'provider': 'google',
           }),
         );
-
+        print("response status code: ${response.statusCode}"); 
         if (response.statusCode == 200) {
           // Store the access token
           final SharedPreferences prefs = await SharedPreferences.getInstance();
