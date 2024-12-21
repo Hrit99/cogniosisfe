@@ -1,5 +1,6 @@
 import 'package:cogniosis/dimensions.dart';
 import 'package:cogniosis/intro_screen.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -60,7 +61,10 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                 )
               : SizedBox.expand(
-                  child: Center(child: Container(color: Color(0xFF1D2122),)),
+                  child: Center(
+                      child: Container(
+                    color: Color(0xFF1D2122),
+                  )),
                 ),
           Center(
             child: Column(
@@ -71,19 +75,23 @@ class _SplashScreenState extends State<SplashScreen> {
                   width: getWidth(context, 222),
                   height: getHeight(context, 65),
                 ),
-                SizedBox(height: 16), // Add some space between the image and text
+                SizedBox(
+                    height: 16), // Add some space between the image and text
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: getWidth(context, 45)),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: getWidth(context, 45)),
                   child: Text(
                     'Find peace, focus, and support anytime you need',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Color(0xFFFFFFFF), // Equivalent to var(--white, #FFF)
+                      color:
+                          Color(0xFFFFFFFF), // Equivalent to var(--white, #FFF)
                       fontFamily: 'Satoshi',
                       fontSize: getWidth(context, 16),
                       fontStyle: FontStyle.normal,
                       fontWeight: FontWeight.w500,
-                      height: getHeight(context, 1.5), // Equivalent to line-height: 24px; 150%
+                      height: getHeight(context,
+                          1.5), // Equivalent to line-height: 24px; 150%
                     ),
                   ),
                 ),
@@ -97,65 +105,71 @@ class _SplashScreenState extends State<SplashScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                   Container(
-                     decoration: BoxDecoration(
-                       gradient: RadialGradient(
-                         center: Alignment.center,
-                         radius: 0.5,
-                         colors: [
-                           Color(0xFF3CC7D4),
-                           Color(0xFF099AA8),
-                         ],
-                         stops: [0.0, 1.0],
-                       ),
-                       borderRadius: BorderRadius.circular(24.0),
-                     ),
-                     child: ElevatedButton(
-                       onPressed: () => _navigateToSignUp(context),
-                       style: ElevatedButton.styleFrom(
-                         shape: RoundedRectangleBorder(
-                           borderRadius: BorderRadius.circular(24),
-                         ),
-                         backgroundColor: Colors.transparent, // Transparent background
-                         shadowColor: Colors.transparent, // Remove shadow
-                       ),
-                       child: Container(
-                        
-                         alignment: Alignment.center,
-                         child: Text(
-                           'Sign Up',
-                           style: TextStyle(color: Colors.white),
-                         ),
-                       ),
-                     ),
-                   ),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: RadialGradient(
+                        center: Alignment.center,
+                        radius: 0.5,
+                        colors: [
+                          Color(0xFF3CC7D4),
+                          Color(0xFF099AA8),
+                        ],
+                        stops: [0.0, 1.0],
+                      ),
+                      borderRadius: BorderRadius.circular(24.0),
+                    ),
+                    child: ElevatedButton(
+                      onPressed: () => _navigateToSignUp(context),
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        backgroundColor:
+                            Colors.transparent, // Transparent background
+                        shadowColor: Colors.transparent, // Remove shadow
+                      ),
+                      child: Container(
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Sign Up',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ),
                   SizedBox(height: 16),
-                   Container(
-                     decoration: BoxDecoration(
+                  Container(
+                    decoration: BoxDecoration(
                       color: Colors.white,
-                       borderRadius: BorderRadius.circular(24.0),
-                     ),
-                     child: ElevatedButton(
-                       onPressed: () => _navigateToLogin(context),
-                       style: ElevatedButton.styleFrom(
-                         shape: RoundedRectangleBorder(
-                           borderRadius: BorderRadius.circular(24),
-                         ),
-                         backgroundColor: Colors.transparent, // Transparent background
-                         shadowColor: Colors.transparent, // Remove shadow
-                       ),
-                       child: Container(
-                         height: getHeight(context, 56),
-                         width: getWidth(context, ((135*2) + 92)),
-                         alignment: Alignment.center,
-                         child: Text(
-                           'Login',
-                           style: TextStyle(color: Colors.black),
-                         ),
-                       ),
-                     ),
-                   ),
-                
+                      borderRadius: BorderRadius.circular(24.0),
+                    ),
+                    child: ElevatedButton(
+                      onPressed: () => _navigateToLogin(context),
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        backgroundColor:
+                            Colors.transparent, // Transparent background
+                        shadowColor: Colors.transparent, // Remove shadow
+                      ),
+                      child: Container(
+                        height: getHeight(context, 56),
+                        width: getWidth(context, ((135 * 2) + 92)),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Login',
+                          style: TextStyle(color: Colors.black),
+                        ),
+                      ),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      FirebaseCrashlytics.instance.crash();
+                    },
+                    child: Text('Test Crash'),
+                  )
                 ],
               ),
             ),
