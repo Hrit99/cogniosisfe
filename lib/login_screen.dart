@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:cogniosis/task_provider.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -17,32 +18,36 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  late VideoPlayerController _controller;
+  VideoPlayerController? _controller;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _showPassword = false;
 
   @override
   void deactivate() {
-    _controller.pause();
+    _controller?.pause();
     super.deactivate();
   }
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.asset('assets/login.mp4') 
+    _initializeVideoPlayer();
+  }
+
+  Future<void> _initializeVideoPlayer() async {
+    final file = await DefaultCacheManager().getSingleFile('https://aizenstorage.s3.us-east-1.amazonaws.com/login.mp4');
+    _controller = VideoPlayerController.file(file)
       ..initialize().then((_) {
-        // Ensure the first frame is shown after the video is initialized.
         setState(() {});
-        _controller.play(); // Auto-play the video
-        _controller.setLooping(true); // Loop the video
+        _controller?.play(); // Auto-play the video
+        _controller?.setLooping(true); // Loop the video
       });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -179,14 +184,14 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          _controller.value.isInitialized
+          _controller != null && _controller!.value.isInitialized
               ? SizedBox.expand(
                   child: FittedBox(
                     fit: BoxFit.cover,
                     child: SizedBox(
-                      width: _controller.value.size.width,
-                      height: _controller.value.size.height,
-                      child: VideoPlayer(_controller),
+                      width: _controller!.value.size.width,
+                      height: _controller!.value.size.height,
+                      child: VideoPlayer(_controller!),
                     ),
                   ),
                 )

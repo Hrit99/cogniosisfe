@@ -2,6 +2,7 @@ import 'package:cogniosis/dimensions.dart';
 import 'package:cogniosis/intro_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -9,29 +10,34 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  late VideoPlayerController _controller;
+  VideoPlayerController? _controller;
+  final String videoUrl = 'https://aizenstorage.s3.us-east-1.amazonaws.com/splash.mp4'; // Replace with your video URL
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.asset('assets/splash.mp4')
+    _initializeVideoPlayer();
+  }
+
+  Future<void> _initializeVideoPlayer() async {
+    final file = await DefaultCacheManager().getSingleFile(videoUrl);
+    _controller = VideoPlayerController.file(file)
       ..initialize().then((_) {
-        // Ensure the first frame is shown after the video is initialized.
         setState(() {});
-        _controller.play(); // Auto-play the video
-        _controller.setLooping(true); // Loop the video
+        _controller?.play(); // Auto-play the video
+        _controller?.setLooping(true); // Loop the video
       });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
   @override
   void deactivate() {
-    _controller.pause(); // Pause the video when navigating away
+    _controller?.pause(); // Pause the video when navigating away
     super.deactivate();
   }
 
@@ -54,14 +60,14 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          _controller.value.isInitialized
+          _controller != null && _controller!.value.isInitialized
               ? SizedBox.expand(
                   child: FittedBox(
                     fit: BoxFit.cover,
                     child: SizedBox(
-                      width: _controller.value.size.width,
-                      height: _controller.value.size.height,
-                      child: VideoPlayer(_controller),
+                      width: _controller!.value.size.width,
+                      height: _controller!.value.size.height,
+                      child: VideoPlayer(_controller!),
                     ),
                   ),
                 )

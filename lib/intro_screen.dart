@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:cogniosis/conveyor.dart';
 import 'package:video_player/video_player.dart';
 import 'package:cogniosis/login_screen.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class IntroScreen1 extends StatefulWidget {
   @override
@@ -260,12 +261,18 @@ class IntroScreen2 extends StatefulWidget {
 class _IntroScreen2State extends State<IntroScreen2>
     with SingleTickerProviderStateMixin {
   late VideoPlayerController _videoController;
-  late Future<void> _initializeVideoPlayerFuture;
+  Future<void>? _initializeVideoPlayerFuture;
 
   @override
   void initState() {
     super.initState();
-    _videoController = VideoPlayerController.asset('assets/intro2.mp4')
+
+    _initializeVideoPlayer();
+  }
+
+  Future<void> _initializeVideoPlayer() async {
+    final file = await DefaultCacheManager().getSingleFile('https://aizenstorage.s3.us-east-1.amazonaws.com/intro2.mp4');
+    _videoController = VideoPlayerController.file(file)
       ..setLooping(true);
     _initializeVideoPlayerFuture = _videoController.initialize().then((_) {
       setState(() {});
@@ -538,19 +545,17 @@ class IntroScreen3 extends StatefulWidget {
 class _IntroScreen3State extends State<IntroScreen3>
     with SingleTickerProviderStateMixin {
   late VideoPlayerController _videoController;
-  late Future<void> _initializeVideoPlayerFuture;
-
-  @override
-  void deactivate() {
-    _videoController.pause();
-    super.deactivate();
-  }
-  
+  Future<void>? _initializeVideoPlayerFuture;
 
   @override
   void initState() {
     super.initState();
-    _videoController = VideoPlayerController.asset('assets/intro3.mp4')
+    _initializeVideoPlayer();
+  }
+
+  Future<void> _initializeVideoPlayer() async {
+    final file = await DefaultCacheManager().getSingleFile('https://aizenstorage.s3.us-east-1.amazonaws.com/intro3.mp4');
+    _videoController = VideoPlayerController.file(file)
       ..setLooping(true);
     _initializeVideoPlayerFuture = _videoController.initialize().then((_) {
       setState(() {});
@@ -562,6 +567,12 @@ class _IntroScreen3State extends State<IntroScreen3>
   void dispose() {
     _videoController.dispose();
     super.dispose();
+  }
+
+  @override
+  void deactivate() {
+    _videoController.pause();
+    super.deactivate();
   }
 
   @override

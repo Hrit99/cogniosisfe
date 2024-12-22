@@ -51,6 +51,7 @@ dependencies:
   google_sign_in: ^6.2.2
   shared_preferences: ^2.3.3
   firebase_crashlytics: ^4.2.0
+  flutter_cache_manager: ^3.4.1
 
 dev_dependencies:
   flutter_test:
