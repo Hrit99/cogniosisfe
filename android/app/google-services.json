@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "582387556211",
+    "project_id": "cogniosisapp",
+    "storage_bucket": "cogniosisapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:582387556211:android:c818a3de577130f1d2ef06",
+        "android_client_info": {
+          "package_name": "com.aizen.cogniosisdemo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "582387556211-f0l9rutoch2ua0lstgoj74l6omibnhmo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAo6DQUhVZND1_p61xfsWP1WlXYiCwwFkM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "582387556211-f0l9rutoch2ua0lstgoj74l6omibnhmo.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "582387556211-a914tjgdvgr79uo3vkm1s84jpbm7pmfi.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.aizen.cogniosisdemo"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>582387556211-a914tjgdvgr79uo3vkm1s84jpbm7pmfi.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.582387556211-a914tjgdvgr79uo3vkm1s84jpbm7pmfi</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCjeJiU5JyhsNaIpH2X2ZNHBg4Y_h1ExhI</string>
+	<key>GCM_SENDER_ID</key>
+	<string>582387556211</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.aizen.cogniosisdemo</string>
+	<key>PROJECT_ID</key>
+	<string>cogniosisapp</string>
+	<key>STORAGE_BUCKET</key>
+	<string>cogniosisapp.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:582387556211:ios:da9e4fed3cddd3cdd2ef06</string>
+</dict>
+</plist>
