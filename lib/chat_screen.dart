@@ -2,7 +2,6 @@ import 'package:cogniosis/dimensions.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ChatPage extends StatefulWidget {
   final bool isDarkMode;
@@ -14,7 +13,7 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
   List<Message> _messages = [];
-  final String _apiKey = dotenv.env['OPENAI_API_KEY'] ?? ''; // Access API key from .env file
+  final String _apiKey = const String.fromEnvironment('OPENAI_API_KEY', defaultValue: ''); // Access API key from .env file
   final String _apiUrl = "https://api.openai.com/v1/chat/completions";
 
   Future<void> _sendMessage() async {

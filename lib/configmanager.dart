@@ -1,5 +1,4 @@
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 
 
@@ -17,12 +16,12 @@ class ConfigManager {
 
   // WARNING! For development only. In production, the app should hit your own backend server to get an access token, using "token authentication" (see https://dev.hume.ai/docs/introduction/api-key#token-authentication)
   String fetchHumeApiKey() {
-    return dotenv.env['HUME_API_KEY'] ?? '';
+    return const String.fromEnvironment('HUME_API_KEY', defaultValue: '');
   }
 
   Future<String> fetchAccessToken() async {
-    final humeApiKey = dotenv.env['HUME_API_KEY'] ?? '';
-    final humeSecretKey = dotenv.env['HUME_SECRET_KEY'] ?? '';
+    final humeApiKey = const String.fromEnvironment('HUME_API_KEY', defaultValue: '');
+    final humeSecretKey = const String.fromEnvironment('HUME_SECRET_KEY', defaultValue: '');
     // if (humeApiKey == null || humeSecretKey == null) {
     //   throw Exception('Please set HUME_API_KEY and HUME_SECRET_KEY in your .env file');
     // }
@@ -54,6 +53,6 @@ class ConfigManager {
 
     // Uncomment this to use an access token in production.
     humeAccessToken = await fetchAccessToken();
-    humeConfigId = dotenv.env['HUME_CONFIG_ID'] ?? '';
+    humeConfigId = const String.fromEnvironment('HUME_CONFIG_ID', defaultValue: '');
   }
 }
