@@ -20,8 +20,7 @@ import 'package:cogniosis/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart'; 
 import 'chat_card.dart';
 import 'evi_message.dart' as evi;
   
@@ -30,8 +29,6 @@ void main() async {
 
   // Ensure Flutter binding is initialized before calling asynchronous operations
   WidgetsFlutterBinding.ensureInitialized();
-  
-   await dotenv.load(fileName: ".env");
 
   // Load config in singleton
   await ConfigManager.instance.loadConfig();
@@ -334,14 +331,17 @@ class _MyHomePageState extends State<MyHomePage> {
   // incoming messages.
   void _connect() {
     try {
+      print("ConfigManager.instance.humeAccessToken: ${ConfigManager.instance.humeAccessToken}");
+      print("ConfigManager.instance.humeApiKey: ${ConfigManager.instance.humeApiKey}");
+      print("ConfigManager.instance.humeConfigId: ${ConfigManager.instance.humeConfigId}");
       setState(() {
         _isConnected = true;
       });
-      if (ConfigManager.instance.humeApiKey.isNotEmpty &&
-          ConfigManager.instance.humeAccessToken.isNotEmpty) {
-        throw Exception(
-            'Please use either an API key or an access token, not both');
-      }
+      // if (ConfigManager.instance.humeApiKey.isNotEmpty &&
+      //     ConfigManager.instance.humeAccessToken.isNotEmpty) {
+      //   throw Exception(
+      //       'Please use either an API key or an access token, not both');
+      // }
 
       var uri = 'wss://api.hume.ai/v0/evi/chat';
       if (ConfigManager.instance.humeAccessToken.isNotEmpty) {
