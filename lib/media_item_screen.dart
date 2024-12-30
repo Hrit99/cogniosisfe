@@ -190,13 +190,13 @@ class MediaItemScreen extends StatelessWidget {
               ),
             ),
               Positioned(
-              top: getHeight(context, 10),
+              top: getHeight(context, 40),
               left: getWidth(context, 10),
               child: IconButton(
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                icon: Icon(Icons.arrow_back, color: themeProvider.isDarkMode ? Colors.white : Colors.black,),
+                icon: Icon(Icons.arrow_back, color: themeProvider.isDarkMode ? Colors.white : Colors.white,),
               ),
             ),
           ],

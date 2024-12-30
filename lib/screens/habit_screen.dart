@@ -14,7 +14,6 @@ class HabitScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final habitProvider = Provider.of<HabitProvider>(context);
     print("jjj");
-    print(habitProvider.habits[0].isActive);
 
     final now = DateTime.now();
     final endOfMonth = DateTime(now.year, now.month + 1, 0);

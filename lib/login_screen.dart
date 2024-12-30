@@ -19,6 +19,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   VideoPlayerController? _controller;
+  bool _isVideoInitialized = false;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _showPassword = false;
@@ -37,13 +38,18 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _initializeVideoPlayer() async {
-    final file = await DefaultCacheManager().getSingleFile('https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/login3_resize.mp4');
-    _controller = VideoPlayerController.file(file)
-      ..initialize().then((_) {
-        setState(() {});
-        _controller?.play(); // Auto-play the video
-        _controller?.setLooping(true); // Loop the video
+    try {
+      final file = await DefaultCacheManager().getSingleFile('https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/login3_resize.mp4');
+      _controller = VideoPlayerController.file(file);
+      await _controller!.initialize();
+      _controller!.play();
+      _controller!.setLooping(true);
+      setState(() {
+        _isVideoInitialized = true;
       });
+    } catch (e) {
+      print('Error initializing video: $e');
+    }
   }
 
   @override
@@ -210,7 +216,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-           _controller != null && _controller!.value.isInitialized
+          _isVideoInitialized && _controller != null
               ? SizedBox.expand(
                   child: FittedBox(
                     fit: BoxFit.cover,
@@ -222,10 +228,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 )
               : Center(child: SizedBox.expand(
-                child: Container(
-                  color: Colors.black,
-                ),
-              )),
+                  child: Container(
+                    color: Colors.black,
+                  ),
+                )),
           Container(
             color: Colors.black.withOpacity(0.5), // Black tint overlay
           ),
