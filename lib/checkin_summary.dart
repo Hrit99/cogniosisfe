@@ -123,11 +123,12 @@ class MoodChart extends StatelessWidget {
     mainAxisAlignment: MainAxisAlignment.start,
     children: [
       Container(
-        height: getHeight(context, 250),
+        height: getHeight(context, 280),
         child: ListView.builder(
-          itemCount: 4,
+          itemCount: 5,
           itemBuilder: (context, kindex) {
             return Container(
+
               height: getHeight(context, 55),
               width: MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
@@ -137,7 +138,7 @@ class MoodChart extends StatelessWidget {
                 ),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(7, (index) {
                   while (moods[index].length < 7) {
                     moods[index].add('No mood set');
@@ -148,8 +149,9 @@ class MoodChart extends StatelessWidget {
                     children: [
                       SizedBox(height: 5),
                       Icon(
+                    
                         _getMoodConfig(moods[index][kindex])['icon'],
-                        color: _getMoodConfig(moods[index][kindex])['color'],
+                        color: _getMoodConfig(moods[index][kindex])['color'], 
                         size: getHeight(context, 40),
                       ),
                     ],
@@ -161,15 +163,15 @@ class MoodChart extends StatelessWidget {
         ),
       ),
       Padding(
-        padding: EdgeInsets.only(right: getWidth(context, 15)),
+        padding: EdgeInsets.only( right: getWidth(context, 6)),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(7, (index) {
             return Text(
               days[index],
               style: TextStyle(
                 color: isDarkMode ? Colors.grey[300]! : Colors.black,
-                fontSize: getHeight(context, 16),
+                fontSize: getHeight(context, 15),
                 fontWeight: FontWeight.bold,
               ),
             );

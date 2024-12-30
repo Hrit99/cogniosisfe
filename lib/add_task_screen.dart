@@ -2,6 +2,10 @@ import 'package:cogniosis/task_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:cogniosis/dimensions.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddTaskScreen extends StatefulWidget {
   final bool isDarkMode;
@@ -34,6 +38,43 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     _dateController.dispose();
     _imageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _createTask() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String jwtToken = prefs.getString('access_token') ?? '';
+
+    final url = Uri.parse('https://cogniosisbe-1366da2257bb.herokuapp.com/tasks');
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $jwtToken',
+      },
+      body: jsonEncode({
+        'title': _nameController.text,
+        'duration_seconds': _seconds + _minutes * 60 + _hours * 3600,
+        'date': _dateController.text,
+        'image': "assets/nebula.jpeg",
+        'note': _noteController.text,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      final responseData = jsonDecode(response.body);
+      print('Task created successfully: ${responseData['task_id']}');
+      Provider.of<TaskProvider>(context, listen: false).addTask(Task(
+        id: responseData['task_id'],
+        title: _nameController.text,
+        duration: Duration(seconds: _seconds + _minutes * 60 + _hours * 3600),
+        date: DateTime.parse(_dateController.text),
+        note: _noteController.text,
+        image: "assets/nebula.jpeg",
+      ));
+      Navigator.pop(context);
+    } else {
+      print('Failed to create task: ${response.body}');
+    }
   }
 
   @override
@@ -328,19 +369,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
             borderRadius: BorderRadius.circular(24.0),
           ),
           child: ElevatedButton(
-            onPressed: () {
-              Task task = Task(
-                id: 0,
-                title: _nameController.text,
-                duration: Duration(seconds: _seconds + _minutes * 60 + _hours * 3600),
-                date: DateTime.parse(_dateController.text),
-                note: _noteController.text,
-                image: "assets/nebula.jpeg",
-              );
-              print(task.title);
-              Provider.of<TaskProvider>(context, listen: false).addTask(task);
-              Navigator.pop(context);
-            },
+            onPressed: _createTask,
             style: ElevatedButton.styleFrom(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),

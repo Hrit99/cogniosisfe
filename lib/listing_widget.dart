@@ -288,11 +288,6 @@ class _ListingWidgetState extends State<ListingWidget> {
                       ),
                     ),
                     SizedBox(width: getWidth(context, 12)),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.asset(task.image, height: getWidth(context, 72), width: getWidth(context, 72), fit: BoxFit.cover,),
-                    ),
-                    SizedBox(width: getWidth(context, 20)),
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -303,6 +298,17 @@ class _ListingWidgetState extends State<ListingWidget> {
                         );
                       },
                       child: Container(
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.asset(task.image, height: getWidth(context, 72), width: getWidth(context, 72), fit: BoxFit.cover,),
+                            ),
+                        
+                    SizedBox(width: getWidth(context, 20)),
+                     Container(
+                      width: getWidth(context, 200),
+                      color: Colors.transparent,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -337,7 +343,10 @@ class _ListingWidgetState extends State<ListingWidget> {
                           ],
                         ),
                       ),
-                    )
+                          ]
+                        ), 
+                      ),
+                    ), 
                   ],
                 ),
               );
