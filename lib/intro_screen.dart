@@ -11,7 +11,29 @@ class IntroScreen1 extends StatefulWidget {
   _IntroScreen1State createState() => _IntroScreen1State();
 }
 
-class _IntroScreen1State extends State<IntroScreen1> {
+class _IntroScreen1State extends State<IntroScreen1> with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeIn,
+    );
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,11 +50,14 @@ class _IntroScreen1State extends State<IntroScreen1> {
         },
         child: Stack(
           children: [
-            _buildPageWithImage(
-                context,
-                'Guided Meditation & Soothing Sounds',
-                'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/some.jpeg',
-                'Explore a library of calming videos and audios designed for your well-being.'),
+            FadeTransition(
+              opacity: _fadeAnimation,
+              child: _buildPageWithImage(
+                  context,
+                  'Guided Meditation & Soothing Sounds',
+                  'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/some.jpeg',
+                  'Explore a library of calming videos and audios designed for your well-being.'),
+            ),
             Positioned(
               bottom: getHeight(context, 20),
               left: 0,
@@ -100,12 +125,15 @@ class _IntroScreen1State extends State<IntroScreen1> {
       BuildContext context, String text, String imagePath, String subtext) {
     return Stack(
       children: [
-        Container(
-          margin: EdgeInsets.only(bottom: 100),
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: NetworkImage(imagePath),
-              fit: BoxFit.cover,
+        FadeTransition(
+          opacity: _fadeAnimation,
+          child: Container(
+            margin: EdgeInsets.only(bottom: 100),
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: NetworkImage(imagePath),
+                fit: BoxFit.cover,
+              ),
             ),
           ),
         ),
@@ -118,24 +146,30 @@ class _IntroScreen1State extends State<IntroScreen1> {
               color: Colors.transparent,
               child: Column(
                 children: [
-                  ConveyorBeltWidget(
-                    imageUrls: [
-                      'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/fingeronwater.jpeg',
-                      'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/meditationwhite.jpeg',
-                      'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/flowerstem.jpeg',
-                    ],
-                    height: 100,
-                    speedUp: false,
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: ConveyorBeltWidget(
+                      imageUrls: [
+                        'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/fingeronwater.jpeg',
+                        'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/meditationwhite.jpeg',
+                        'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/flowerstem.jpeg',
+                      ],
+                      height: 100,
+                      speedUp: false,
+                    ),
                   ),
                   SizedBox(height: 10),
-                  ConveyorBeltWidget(
-                    imageUrls: [
-                      'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/backhandclap.jpeg',
-                      'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/highleg.jpeg',
-                      'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/manstandingontop.jpeg',
-                    ],
-                    height: 100,
-                    speedUp: true,
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: ConveyorBeltWidget(
+                      imageUrls: [
+                        'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/backhandclap.jpeg',
+                        'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/highleg.jpeg',
+                        'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/manstandingontop.jpeg',
+                      ],
+                      height: 100,
+                      speedUp: true,
+                    ),
                   ),
                 ],
               ),
@@ -264,10 +298,22 @@ class _IntroScreen2State extends State<IntroScreen2>
     with SingleTickerProviderStateMixin {
   late VideoPlayerController _videoController;
   Future<void>? _initializeVideoPlayerFuture;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
+
+    _animationController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeIn,
+    );
+    _animationController.forward();
 
     _initializeVideoPlayer();
   }
@@ -321,6 +367,7 @@ class _IntroScreen2State extends State<IntroScreen2>
   @override
   void dispose() {
     _videoController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -349,19 +396,22 @@ class _IntroScreen2State extends State<IntroScreen2>
               future: _initializeVideoPlayerFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
-                  return Stack(children: [
-                    Container(
-                      height: MediaQuery.of(context).size.height,
-                      width: MediaQuery.of(context).size.width,
-                      color: Colors.black,
-                    ),
-                    _buildPageWithVideo(
-                        context,
-                        'Chat & Call with AI Support',
-                        _videoController,
-                        "Our AI assistant is here to support you with thoughtful conversation and guidance",
-                        2),
-                  ]);
+                  return FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Stack(children: [
+                      Container(
+                        height: MediaQuery.of(context).size.height,
+                        width: MediaQuery.of(context).size.width,
+                        color: Colors.black,
+                      ),
+                      _buildPageWithVideo(
+                          context,
+                          'Chat & Call with AI Support',
+                          _videoController,
+                          "Our AI assistant is here to support you with thoughtful conversation and guidance",
+                          2),
+                    ]),
+                  );
                 } else {
                   return Center(
                       child: Container(
@@ -579,10 +629,21 @@ class _IntroScreen3State extends State<IntroScreen3>
     with SingleTickerProviderStateMixin {
   late VideoPlayerController _videoController;
   Future<void>? _initializeVideoPlayerFuture;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeIn,
+    );
+    _animationController.forward();
     _initializeVideoPlayer();
   }
 
@@ -599,6 +660,7 @@ class _IntroScreen3State extends State<IntroScreen3>
   @override
   void dispose() {
     _videoController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -627,12 +689,15 @@ class _IntroScreen3State extends State<IntroScreen3>
               future: _initializeVideoPlayerFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
-                  return _buildPageWithVideo(
-                      context,
-                      'Pomodoro Task Scheduling',
-                      _videoController,
-                      "Set tasks, take mindful breaks, and stay on track with our Pomodoro feature",
-                      3);
+                  return FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: _buildPageWithVideo(
+                        context,
+                        'Pomodoro Task Scheduling',
+                        _videoController,
+                        "Set tasks, take mindful breaks, and stay on track with our Pomodoro feature",
+                        3),
+                  );
                 } else {
                   return Center(
                       child: Container(

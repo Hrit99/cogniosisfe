@@ -359,7 +359,14 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       return;
     }
 
-    Habit habit = Habit(name: _nameController.text, isActive: true, time: _selectedSlot, days: _selectedDays.map((day) => day ? 'Monday' : '').toList(), date: DateTime.parse(_dateController.text.split(' ')[0]));
+    print(_selectedDays);
+
+    List<String> fullDayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    Habit habit = Habit(
+      name: _nameController.text,
+      time: _selectedSlot,
+      days: _selectedDays.asMap().entries.map((entry) => entry.value ? fullDayNames[entry.key] : '').where((day) => day.isNotEmpty).toList(),
+    );
     _habitProvider.addHabit(habit);
     // Create habit logic here
     Navigator.pop(context);

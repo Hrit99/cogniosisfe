@@ -75,17 +75,17 @@ class _ConveyorBeltWidgetState extends State<ConveyorBeltWidget>
         itemBuilder: (context, index) {
           // Wrap the index to create a seamless loop
           final itemIndex = index % widget.imageUrls.length;
-          return Container(
-            width: getWidth(context, 174),
-            height: getHeight(context, 148),
-            margin: const EdgeInsets.symmetric(horizontal: 4.0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.0),
-              image: DecorationImage(
-                image: NetworkImage(widget.imageUrls[itemIndex]),
-                fit: BoxFit.cover,
+          return  Container(
+              width: getWidth(context, 174),
+              height: getHeight(context, 148),
+              margin: const EdgeInsets.symmetric(horizontal: 4.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8.0),
+                image: DecorationImage(
+                  image: NetworkImage(widget.imageUrls[itemIndex]),
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
           );
         },
       ),

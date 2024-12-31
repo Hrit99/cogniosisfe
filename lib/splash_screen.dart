@@ -9,13 +9,23 @@ class SplashScreen extends StatefulWidget {
   _SplashScreenState createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
   VideoPlayerController? _controller;
   final String videoUrl = 'https://aizenstorage.s3.us-east-1.amazonaws.com/splash.mp4'; // Replace with your video URL
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeIn,
+    );
     _initializeVideoPlayer();
   }
 
@@ -26,12 +36,14 @@ class _SplashScreenState extends State<SplashScreen> {
         setState(() {});
         _controller?.play(); // Auto-play the video
         _controller?.setLooping(true); // Loop the video
+        _animationController.forward(); // Start the fade-in animation
       });
   }
 
   @override
   void dispose() {
     _controller?.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -44,14 +56,37 @@ class _SplashScreenState extends State<SplashScreen> {
   void _navigateToSignUp(BuildContext context) {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => IntroScreen1()),
+      _createFadeScaleRoute(IntroScreen1()),
     );
   }
 
   void _navigateToLogin(BuildContext context) {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => IntroScreen1()),
+      _createFadeScaleRoute(IntroScreen1()),
+    );
+  }
+
+  Route _createFadeScaleRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionDuration: Duration(milliseconds: 4000),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        var curve = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+        );
+
+        return FadeTransition(
+          opacity: curve,
+          child: Transform.scale(
+            scale: Tween<double>(begin: 1.1, end: 1.0)
+                .animate(curve)
+                .value,
+            child: child,
+          ),
+        );
+      },
     );
   }
 
@@ -61,13 +96,16 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Stack(
         children: [
           _controller != null && _controller!.value.isInitialized
-              ? SizedBox.expand(
-                  child: FittedBox(
-                    fit: BoxFit.cover,
-                    child: SizedBox(
-                      width: _controller!.value.size.width,
-                      height: _controller!.value.size.height,
-                      child: VideoPlayer(_controller!),
+              ? FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: SizedBox.expand(
+                    child: FittedBox(
+                      fit: BoxFit.cover,
+                      child: SizedBox(
+                        width: _controller!.value.size.width,
+                        height: _controller!.value.size.height,
+                        child: VideoPlayer(_controller!),
+                      ),
                     ),
                   ),
                 )
@@ -78,35 +116,38 @@ class _SplashScreenState extends State<SplashScreen> {
                   )),
                 ),
           Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.asset(
-                  'assets/splashscreenicon.png',
-                  width: getWidth(context, 222),
-                  height: getHeight(context, 65),
-                ),
-                SizedBox(
-                    height: 16), // Add some space between the image and text
-                Padding(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: getWidth(context, 45)),
-                  child: Text(
-                    'Find peace, focus, and support anytime you need',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color:
-                          Color(0xFFFFFFFF), // Equivalent to var(--white, #FFF)
-                      fontFamily: 'Satoshi',
-                      fontSize: getWidth(context, 16),
-                      fontStyle: FontStyle.normal,
-                      fontWeight: FontWeight.w500,
-                      height: getHeight(context,
-                          1.5), // Equivalent to line-height: 24px; 150%
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    'assets/splashscreenicon.png',
+                    width: getWidth(context, 222),
+                    height: getHeight(context, 65),
+                  ),
+                  SizedBox(
+                      height: 16), // Add some space between the image and text
+                  Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: getWidth(context, 45)),
+                    child: Text(
+                      'Find peace, focus, and support anytime you need',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color:
+                            Color(0xFFFFFFFF), // Equivalent to var(--white, #FFF)
+                        fontFamily: 'Satoshi',
+                        fontSize: getWidth(context, 16),
+                        fontStyle: FontStyle.normal,
+                        fontWeight: FontWeight.w500,
+                        height: getHeight(context,
+                            1.5), // Equivalent to line-height: 24px; 150%
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           Align(

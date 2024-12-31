@@ -14,6 +14,7 @@ class WeekProgressWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(weekData);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: weekData.entries.map((entry) {
@@ -21,8 +22,9 @@ class WeekProgressWidget extends StatelessWidget {
           isTop: isTop,
           day: entry.key,
           progress: entry.value['completed'] as int,
-          date: entry.value['date'] as DateTime,
+          date: DateTime.parse(entry.value['date'] as String),
           name: name, 
+          present: (entry.value['present'] as bool?) ?? true,
         );
       }).toList(),
     );
@@ -35,8 +37,10 @@ class _DayProgressCircle extends StatelessWidget {
   final DateTime date;
   final bool isTop;
   final String name;
+  final bool present;
 
-  const _DayProgressCircle({Key? key, required this.day, required this.progress, required this.date, this.isTop = true, required this.name})
+
+  const _DayProgressCircle({Key? key, required this.day, required this.progress, required this.date, this.isTop = true, required this.name,  this.present = true})
       : super(key: key);
 
   @override
@@ -54,7 +58,7 @@ class _DayProgressCircle extends StatelessWidget {
         ) : const SizedBox.shrink(),
            const SizedBox(height: 5),
         GestureDetector(
-          onTap: isTop ? null : () {
+          onTap: isTop ? null : () async {
             // Define the action to be taken when the circle is clicked
             print('Circle clicked for day: $day');
             // String fullDayName;
@@ -77,7 +81,7 @@ class _DayProgressCircle extends StatelessWidget {
             //   case 'Sat':
             //     fullDayName = 'Saturday';
             //     break;
-            //   case 'Sun':
+            //   case 'Sun': 
             //     fullDayName = 'Sunday';
             //     break;
             //   default:
@@ -85,8 +89,13 @@ class _DayProgressCircle extends StatelessWidget {
             // }
 
             final habitProvider = Provider.of<HabitProvider>(context, listen: false);
-            final currentCompletion = habitProvider.getHabitCompletion(date.toString().split(' ')[0], name);
-            habitProvider.setHabitCompletion(date.toString().split(' ')[0], name, currentCompletion ? false : true);
+            if (present) {
+              final currentCompletion = await habitProvider.getHabitCompletedOnDay(date, name);
+              print(currentCompletion);
+              habitProvider.setHabitCompletedOnDay(date, name, currentCompletion ? false : true);
+            }
+            // final currentCompletion = habitProvider.getHabitCompletion(date.toString().split(' ')[0], name);
+            // habitProvider.setHabitCompletion(date.toString().split(' ')[0], name, currentCompletion ? false : true);
             // Provider.of<HabitProvider>(context, listen: false).toggleHabit(name, fullDayName);
           },
           child: Container(
@@ -95,9 +104,11 @@ class _DayProgressCircle extends StatelessWidget {
             decoration: BoxDecoration(
               color: isTop 
                 ? Colors.transparent 
-                : (date.isBefore(DateTime.now().add(Duration(days: 1))) 
-                    ? (progress > 0 ? Colors.red : Colors.blue) 
-                    : (isDarkMode ? Colors.transparent : Colors.white)),
+                : (present 
+                    ? (date.isBefore(DateTime.now().add(Duration(days: 0))) 
+                        ? (progress == 100 ? Colors.blue : Colors.red) 
+                        : (isDarkMode ? Colors.transparent : Colors.white))
+                    : Colors.transparent),
               borderRadius: BorderRadius.circular(100),
             ),
             child: Stack(
@@ -116,7 +127,7 @@ class _DayProgressCircle extends StatelessWidget {
                 ),
                 // Center Number
                 Center(
-                  child: Text(
+                  child: present ? Text(
                     isTop ? date.day.toString() : day[0], // Highlight date on Monday
                     style: TextStyle(
                       fontFamily: 'Satoshi',
@@ -124,7 +135,7 @@ class _DayProgressCircle extends StatelessWidget {
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
-                  ),
+                  ) : const SizedBox.shrink(),
                 ),
               ],
             ),
