@@ -88,6 +88,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       print("signing in with google");
       // Trigger the authentication flow
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+	print("googleUser: $googleUser");	
 
       // Obtain the auth details from the request
       final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
@@ -130,6 +131,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         }
       }
     } catch (e) {
+	print(e);
       _showSnackBar('Error logging in with Google: $e');
     } finally {
       setState(() {
