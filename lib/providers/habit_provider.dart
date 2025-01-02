@@ -12,8 +12,16 @@ class HabitProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void removeHabit(String habitName, String habitTime) {
+  void removeHabit(String habitName, String habitTime) async {
     _habits.removeWhere((habit) => habit.name == habitName && habit.time == habitTime);
+    
+    // Clear stored completion data
+    final prefs = await SharedPreferences.getInstance();
+    final keys = prefs.getKeys();
+    keys.where((key) => key.startsWith('${habitName}_')).forEach((key) {
+      prefs.remove(key);
+    });
+    
     notifyListeners();
   }
 

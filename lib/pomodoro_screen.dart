@@ -163,31 +163,31 @@ class PomodoroScreen extends StatelessWidget {
     Map<String, Map<String, Object>> weekData = {
       'Mon': {
         "completed": 0,
-        "date": startOfWeek,
+        "date": startOfWeek.toString(),
       },
       'Tue': {
         "completed": 0,
-        "date": startOfWeek.add(Duration(days: 1)),
+        "date": startOfWeek.add(Duration(days: 1)).toString(),
       },
       'Wed': {
         "completed": 0,
-        "date": startOfWeek.add(Duration(days: 2)),
+        "date": startOfWeek.add(Duration(days: 2)).toString(),
       },
       'Thur': {
         "completed": 0,
-        "date": startOfWeek.add(Duration(days: 3)),
+        "date": startOfWeek.add(Duration(days: 3)).toString(),
       },
       'Fri': {
         "completed": 0,
-        "date": startOfWeek.add(Duration(days: 4)),
+        "date": startOfWeek.add(Duration(days: 4)).toString(),
       },
       'Sat': {
         "completed": 0,
-        "date": startOfWeek.add(Duration(days: 5)),
+        "date": startOfWeek.add(Duration(days: 5)).toString(),
       },
       'Sun': {
         "completed": 0,
-        "date": startOfWeek.add(Duration(days: 6)),
+        "date": startOfWeek.add(Duration(days: 6)).toString(),
       },
     };
 
@@ -254,7 +254,7 @@ class PomodoroScreen extends StatelessWidget {
       }
 
     for (var entry in weekData.entries) {
-      int taskCount = tasks.where((task) => task.date.weekday == (entry.value['date'] as DateTime?)?.weekday).length;
+      int taskCount = tasks.where((task) => task.date.weekday == (DateTime.parse(entry.value['date'] as String)).weekday).length;
       entry.value['completed'] =
           ((entry.value['completed'] as int) / (taskCount > 0 ? taskCount : 1)).toInt();
     }

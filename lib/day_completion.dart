@@ -53,10 +53,10 @@ class _DayProgressCircle extends StatelessWidget {
           style: TextStyle(
             fontFamily: 'Satoshi',
             color: isDarkMode ? Colors.white : Colors.black,
-            fontSize: 12,
+            fontSize: getHeight(context, 12),
           ),
         ) : const SizedBox.shrink(),
-           const SizedBox(height: 5),
+           SizedBox(height: getHeight(context, 5)),
         GestureDetector(
           onTap: isTop ? null : () async {
             // Define the action to be taken when the circle is clicked
@@ -117,7 +117,7 @@ class _DayProgressCircle extends StatelessWidget {
                 CircularProgressIndicator(
                   value: 1, // full circle as background
                   strokeWidth: getWidth(context, 2),
-                  valueColor: AlwaysStoppedAnimation<Color>(isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200),
+                  valueColor: AlwaysStoppedAnimation<Color>(isDarkMode ? Colors.grey.shade800 : Colors.grey.shade400),
                 ),
                 // Progress Circle
                 CircularProgressIndicator(
@@ -132,7 +132,7 @@ class _DayProgressCircle extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: 'Satoshi',
                       color: isDarkMode ? Colors.white : Colors.black,
-                      fontSize: 12,
+                      fontSize: getHeight(context, 12),
                       fontWeight: FontWeight.bold,
                     ),
                   ) : const SizedBox.shrink(),

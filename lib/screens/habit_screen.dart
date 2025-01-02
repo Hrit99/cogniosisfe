@@ -83,7 +83,16 @@ class HabitScreen extends StatelessWidget {
                       children: habitProvider.getUniqueTimes().map((time) => Container(
                          child: Column(
                            crossAxisAlignment: CrossAxisAlignment.start,
-                           children: habitProvider.habits
+                           children: [        Text(
+                                                       time ?? 'Anytime', 
+                                                       style: TextStyle(
+                                                         fontSize: getHeight(context, 20),
+                                                         fontFamily: 'Satoshi',
+                                                         fontWeight: FontWeight.bold,
+                                                         color: isDarkMode ? Colors.white : Colors.black,
+                                                       ),
+                                                     ),
+                                                      ...habitProvider.habits
                                .where((habit) => habit.time == time)
                                .map((habit) => FutureBuilder<Map<String, Map<String, Object>>>(
                                      future: habitProvider.getWeekDataForHabit(now, habit.name),
@@ -98,44 +107,79 @@ class HabitScreen extends StatelessWidget {
                                          return Container(
                                            margin: EdgeInsets.symmetric(vertical: 5.0),
                                            width: double.infinity,
-                                           padding: EdgeInsets.symmetric(horizontal: getWidth(context, 10), vertical: getHeight(context, 20)),
+                                           padding: EdgeInsets.symmetric(horizontal: getWidth(context, 0), vertical: getHeight(context, 10)),
                                            decoration: BoxDecoration(
                                              color: isDarkMode ? Color(0xFF1D2122) : Colors.grey[200],
                                              borderRadius: BorderRadius.circular(10),
                                            ),
-                                           child: ListTile(
-                                             title: Column(
-                                               crossAxisAlignment: CrossAxisAlignment.start,
-                                               children: [
-                                                 Text(
-                                                   time ?? 'Anytime', 
-                                                   style: TextStyle(
-                                                     fontSize: getHeight(context, 20),
-                                                     fontFamily: 'Satoshi',
-                                                     fontWeight: FontWeight.bold,
-                                                     color: isDarkMode ? Colors.white : Colors.black,
+                                           child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.end,
+                                             children: [
+                                               ListTile(
+                                                 title: Column(
+                                                     crossAxisAlignment: CrossAxisAlignment.start,
+                                                     children: [
+                                                       Row(
+                                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                         children: [
+                                                           Text(
+                                                             habit.name,
+                                                             style: TextStyle(
+                                                               color: isDarkMode ? Colors.white : Colors.black,
+                                                               fontWeight: FontWeight.bold,
+                                                             ),
+                                                           ),
+                                                         ],
+                                                       ),
+                                                       WeekProgressWidget(
+                                                         weekData: habitWeekData,
+                                                         isTop: false,
+                                                         name: habit.name,
+                                                       ),
+                                                     ],
                                                    ),
-                                                 ),
-                                                 Text(
-                                                   habit.name,
-                                                   style: TextStyle(
-                                                     color: isDarkMode ? Colors.white : Colors.black,
-                                                     fontWeight: FontWeight.bold,
-                                                   ),
-                                                 ),
-                                                 WeekProgressWidget(
-                                                   weekData: habitWeekData,
-                                                   isTop: false,
-                                                   name: habit.name,
-                                                 ),
-                                               ],
-                                             ),
+                                               ),
+                                                IconButton(
+                                                         icon: Icon(Icons.delete, color: isDarkMode ? Colors.white : Colors.black, size: getHeight(context, 20),),
+                                                         onPressed: () {
+                                                           showDialog(
+                                                             context: context,
+                                                             builder: (BuildContext context) {
+                                                               return AlertDialog(
+                                                                 backgroundColor: isDarkMode ? Color(0xFF1D2122) : Colors.white,
+                                                                 title: Text(
+                                                                   'Delete Habit',
+                                                                   style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+                                                                 ),
+                                                                 content: Text(
+                                                                   'Are you sure you want to delete this habit?',
+                                                                   style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+                                                                 ),
+                                                                 actions: [
+                                                                   TextButton(
+                                                                     child: Text('Cancel'),
+                                                                     onPressed: () => Navigator.of(context).pop(),
+                                                                   ),
+                                                                   TextButton(
+                                                                     child: Text('Delete'),
+                                                                     onPressed: () {
+                                                                       habitProvider.removeHabit(habit.name, habit.time!);
+                                                                       Navigator.of(context).pop();
+                                                                     },
+                                                                   ),
+                                                                 ],
+                                                               );
+                                                             },
+                                                           );
+                                                         },
+                                                       ),
+                                             ],
                                            ),
                                          );
                                        }
                                      },
                                    ))
-                               .toList(),
+                               .toList()]
                          ),
                        ),
                         ).toList()

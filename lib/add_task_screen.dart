@@ -1,3 +1,4 @@
+import 'package:cogniosis/login_screen.dart';
 import 'package:cogniosis/task_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:cogniosis/dimensions.dart';
@@ -74,6 +75,10 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       Navigator.pop(context);
     } else {
       print('Failed to create task: ${response.body}');
+      print(jsonDecode(response.body));
+      if (jsonDecode(response.body)['msg']  == "Token has expired") {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
+      }
     }
   }
 
