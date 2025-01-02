@@ -99,19 +99,8 @@ class _DayProgressCircle extends StatelessWidget {
             // Provider.of<HabitProvider>(context, listen: false).toggleHabit(name, fullDayName);
           },
           child: Container(
-            height: getWidth(context, 40),
-            width: getWidth(context, 40),
-            decoration: BoxDecoration(
-              color: isTop 
-                ? Colors.transparent 
-                : (present 
-                    ? (date.isBefore(DateTime.now().add(Duration(days: 0))) 
-                        ? (progress == 100 ? Colors.blue : Colors.red) 
-                        : (isDarkMode ? Colors.transparent : Colors.white))
-                    : Colors.transparent),
-              borderRadius: BorderRadius.circular(100),
-            ),
             child: Stack(
+		alignment: Alignment.center,
               children: [
                 // Background Circle
                 CircularProgressIndicator(
@@ -125,18 +114,39 @@ class _DayProgressCircle extends StatelessWidget {
                   strokeWidth: getWidth(context, 2),
                   valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF099AA8)),
                 ),
-                // Center Number
-                Center(
-                  child: present ? Text(
-                    isTop ? date.day.toString() : day[0], // Highlight date on Monday
-                    style: TextStyle(
-                      fontFamily: 'Satoshi',
-                      color: isDarkMode ? Colors.white : Colors.black,
-                      fontSize: getHeight(context, 12),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ) : const SizedBox.shrink(),
-                ),
+               Center(
+                  child: present
+                      ? Container(
+                          decoration: BoxDecoration(
+                            color: isTop
+                                ? Colors.transparent
+                                : (present
+                                    ? (date.isBefore(DateTime.now()
+                                            .add(Duration(days: 0)))
+                                        ? (progress == 100
+                                            ? Colors.blue
+                                            : Colors.red)
+                                        : (isDarkMode
+                                            ? Colors.transparent
+                                            : Colors.white))
+                                    : Colors.transparent),
+				shape: BoxShape.circle,
+                          ),
+                          padding: EdgeInsets.all(getWidth(context, 11)),
+                          child: Text(
+                            isTop
+                                ? date.day.toString()
+                                : day[0], // Highlight date on Monday
+                            style: TextStyle(
+                              fontFamily: 'Satoshi',
+                              color: isDarkMode ? Colors.white : Colors.black,
+                              fontSize: getHeight(context, 12),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                )
               ],
             ),
           ),
