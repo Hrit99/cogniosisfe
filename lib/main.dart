@@ -20,13 +20,11 @@ import 'package:cogniosis/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart'; 
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'chat_card.dart';
 import 'evi_message.dart' as evi;
-  
+
 void main() async {
-
-
   // Ensure Flutter binding is initialized before calling asynchronous operations
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -43,7 +41,6 @@ void main() async {
         Brightness.dark, // Set icon color in navigation bar
   ));
 
-  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -179,15 +176,14 @@ class _MyHomePageState extends State<MyHomePage> {
   // of a message from EVI, parses it into a `ChatMessage` type and adds it to `chatEntries` so
   // it can be displayed.
   void appendNewChatMessage(evi.ChatMessage chatMessage, evi.Inference models) {
-    final role = chatMessage.role == 'assistant' ? Role.assistant : Role.user;
-    final entry = ChatEntry(
-        role: role,
-        timestamp: DateTime.now().toString(),
-        content: chatMessage.content,
-        scores: MyApp.extractTopThreeEmotions(models));
-    setState(() {
-      chatEntries.add(entry);
-    });
+    // final role = chatMessage.role == 'assistant' ? Role.assistant : Role.user;
+    // final entry = ChatEntry(
+    //     role: role,
+    //     timestamp: DateTime.now().toString(),
+    //     content: chatMessage.content,
+    //     scores: MyApp.extractTopThreeEmotions(models));
+
+    //   chatEntries.add(entry);
   }
 
   @override
@@ -268,9 +264,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void dispose() {
+    _tunePlayer.dispose(); // Dispose the tune player
     _audioPlayer.dispose();
     _audioRecorder.dispose();
-    _tunePlayer.dispose(); // Dispose the tune player
     _disconnect();
     super.dispose();
   }
@@ -330,10 +326,14 @@ class _MyHomePageState extends State<MyHomePage> {
   // Opens a websocket connection to the EVI API and registers a listener to handle
   // incoming messages.
   void _connect() {
+    _audioInputBuffer.clear();
     try {
-      print("ConfigManager.instance.humeAccessToken: ${ConfigManager.instance.humeAccessToken}");
-      print("ConfigManager.instance.humeApiKey: ${ConfigManager.instance.humeApiKey}");
-      print("ConfigManager.instance.humeConfigId: ${ConfigManager.instance.humeConfigId}");
+      print(
+          "ConfigManager.instance.humeAccessToken: ${ConfigManager.instance.humeAccessToken}");
+      print(
+          "ConfigManager.instance.humeApiKey: ${ConfigManager.instance.humeApiKey}");
+      print(
+          "ConfigManager.instance.humeConfigId: ${ConfigManager.instance.humeConfigId}");
       setState(() {
         _isConnected = true;
       });
@@ -366,6 +366,7 @@ class _MyHomePageState extends State<MyHomePage> {
             debugPrint("Received message: ${message.type}");
             // Stop the tune when a message is received
             _stopTune();
+            print("message: $message");
             // This message contains audio data for playback.
             switch (message) {
               case (evi.ErrorMessage errorMessage):
@@ -377,6 +378,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 _startRecording();
                 break;
               case (evi.AudioOutputMessage audioOutputMessage):
+              print("audioOutputMessage: ${audioOutputMessage.rawJson}");
                 final data = audioOutputMessage.data;
                 final rawAudio = base64Decode(data);
                 Source source;
@@ -386,7 +388,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   source = BytesSource(rawAudio);
                 }
 
-                _enqueueAudioSegment(source);
+
+                 _enqueueAudioSegment(source);
                 break;
               case (evi.UserInterruptionMessage _):
                 _handleInterruption();
@@ -394,15 +397,24 @@ class _MyHomePageState extends State<MyHomePage> {
               // These messages contain the transcript text of the user's or the assistant's speech
               // as well as emotional analysis of the speech.
               case (evi.AssistantMessage assistantMessage):
+                print("assistantMessage: ${assistantMessage.message.content}");
+                print(
+                    "assistantMessage.models: ${assistantMessage.message.role}");
                 appendNewChatMessage(
                     assistantMessage.message, assistantMessage.models);
                 break;
               case (evi.UserMessage userMessage):
+                print("userMessage: ${userMessage.message.content}");
+                print("userMessage.models: ${userMessage.message.role}");
                 appendNewChatMessage(userMessage.message, userMessage.models);
                 _handleInterruption();
                 break;
               case (evi.UnknownMessage unknownMessage):
                 debugPrint("Unknown message: ${unknownMessage.rawJson}");
+              
+                 // _sendAudio(_audioInputBuffer);
+                  _audioInputBuffer.clear();
+                
                 break;
             }
           } catch (e) {
@@ -427,14 +439,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _disconnect() {
     try {
-      if (_isConnected) {
-        _handleInterruption();
-        _handleConnectionClosed();
-      }
+      _handleInterruption();
+      _handleConnectionClosed();
 
-      if (_chatChannel != null) {
-        _chatChannel?.sink.close();
-      }
+      _chatChannel?.sink.close();
+
       debugPrint("Disconnected");
       Navigator.pop(context);
     } catch (e) {
@@ -449,7 +458,7 @@ class _MyHomePageState extends State<MyHomePage> {
         return;
       }
       if (_audioPlayer.state == PlayerState.playing) {
-        _playbackAudioQueue.add(audioSegment);
+         _playbackAudioQueue.add(audioSegment);
       } else {
         _audioPlayer.play(audioSegment);
       }
@@ -538,17 +547,20 @@ class _MyHomePageState extends State<MyHomePage> {
       final audioStream = await _audioRecorder.startStream(config);
 
       audioStream.listen((data) async {
-        _audioInputBuffer.addAll(data);
+        // Filter out any audio data that might be from played audio
+        if (_isConnected) {
+          _audioInputBuffer.addAll(data);
 
-        if (_audioInputBuffer.length >= audioInputBufferSize) {
-          final bufferWasEmpty =
-              !_audioInputBuffer.any((element) => element != 0);
-          if (bufferWasEmpty) {
+          if (_audioInputBuffer.length >= audioInputBufferSize) {
+            final bufferWasEmpty =
+                !_audioInputBuffer.any((element) => element != 0);
+            if (bufferWasEmpty) {
+              _audioInputBuffer = [];
+              return;
+            }
+            _sendAudio(_audioInputBuffer);
             _audioInputBuffer = [];
-            return;
           }
-          _sendAudio(_audioInputBuffer);
-          _audioInputBuffer = [];
         }
       });
       audioStream.handleError((error) {

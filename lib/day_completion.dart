@@ -9,7 +9,8 @@ class WeekProgressWidget extends StatelessWidget {
   final bool isTop;
   final String name;
 
-  const WeekProgressWidget({Key? key, required this.weekData, this.isTop = true, this.name = ''})
+  const WeekProgressWidget(
+      {Key? key, required this.weekData, this.isTop = true, this.name = ''})
       : super(key: key);
 
   @override
@@ -18,12 +19,12 @@ class WeekProgressWidget extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: weekData.entries.map((entry) {
-        return _DayProgressCircle(  
+        return _DayProgressCircle(
           isTop: isTop,
           day: entry.key,
           progress: entry.value['completed'] as int,
           date: DateTime.parse(entry.value['date'] as String),
-          name: name, 
+          name: name,
           present: (entry.value['present'] as bool?) ?? true,
         );
       }).toList(),
@@ -39,8 +40,14 @@ class _DayProgressCircle extends StatelessWidget {
   final String name;
   final bool present;
 
-
-  const _DayProgressCircle({Key? key, required this.day, required this.progress, required this.date, this.isTop = true, required this.name,  this.present = true})
+  const _DayProgressCircle(
+      {Key? key,
+      required this.day,
+      required this.progress,
+      required this.date,
+      this.isTop = true,
+      required this.name,
+      this.present = true})
       : super(key: key);
 
   @override
@@ -48,65 +55,73 @@ class _DayProgressCircle extends StatelessWidget {
     final isDarkMode = Provider.of<ThemeProvider>(context).isDarkMode;
     return Column(
       children: [
-          isTop ? Text(
-          day,
-          style: TextStyle(
-            fontFamily: 'Satoshi',
-            color: isDarkMode ? Colors.white : Colors.black,
-            fontSize: getHeight(context, 12),
-          ),
-        ) : const SizedBox.shrink(),
-           SizedBox(height: getHeight(context, 5)),
+        isTop
+            ? Text(
+                day,
+                style: TextStyle(
+                  fontFamily: 'Satoshi',
+                  color: isDarkMode ? Colors.white : Colors.black,
+                  fontSize: getHeight(context, 12),
+                ),
+              )
+            : const SizedBox.shrink(),
+        SizedBox(height: getHeight(context, 5)),
         GestureDetector(
-          onTap: isTop ? null : () async {
-            // Define the action to be taken when the circle is clicked
-            print('Circle clicked for day: $day');
-            // String fullDayName;
-            // switch (day) {
-            //   case 'Mon':
-            //     fullDayName = 'Monday';
-            //     break;
-            //   case 'Tue':
-            //     fullDayName = 'Tuesday';
-            //     break;
-            //   case 'Wed':
-            //     fullDayName = 'Wednesday';
-            //     break;
-            //   case 'Thur':
-            //     fullDayName = 'Thursday';
-            //     break;
-            //   case 'Fri':
-            //     fullDayName = 'Friday';
-            //     break;
-            //   case 'Sat':
-            //     fullDayName = 'Saturday';
-            //     break;
-            //   case 'Sun': 
-            //     fullDayName = 'Sunday';
-            //     break;
-            //   default:
-            //     fullDayName = day;
-            // }
+          onTap: isTop
+              ? null
+              : () async {
+                  // Define the action to be taken when the circle is clicked
+                  print('Circle clicked for day: $day');
+                  // String fullDayName;
+                  // switch (day) {
+                  //   case 'Mon':
+                  //     fullDayName = 'Monday';
+                  //     break;
+                  //   case 'Tue':
+                  //     fullDayName = 'Tuesday';
+                  //     break;
+                  //   case 'Wed':
+                  //     fullDayName = 'Wednesday';
+                  //     break;
+                  //   case 'Thur':
+                  //     fullDayName = 'Thursday';
+                  //     break;
+                  //   case 'Fri':
+                  //     fullDayName = 'Friday';
+                  //     break;
+                  //   case 'Sat':
+                  //     fullDayName = 'Saturday';
+                  //     break;
+                  //   case 'Sun':
+                  //     fullDayName = 'Sunday';
+                  //     break;
+                  //   default:
+                  //     fullDayName = day;
+                  // }
 
-            final habitProvider = Provider.of<HabitProvider>(context, listen: false);
-            if (present) {
-              final currentCompletion = await habitProvider.getHabitCompletedOnDay(date, name);
-              print(currentCompletion);
-              habitProvider.setHabitCompletedOnDay(date, name, currentCompletion ? false : true);
-            }
-            // final currentCompletion = habitProvider.getHabitCompletion(date.toString().split(' ')[0], name);
-            // habitProvider.setHabitCompletion(date.toString().split(' ')[0], name, currentCompletion ? false : true);
-            // Provider.of<HabitProvider>(context, listen: false).toggleHabit(name, fullDayName);
-          },
+                  final habitProvider =
+                      Provider.of<HabitProvider>(context, listen: false);
+                  if (present) {
+                    final currentCompletion =
+                        await habitProvider.getHabitCompletedOnDay(date, name);
+                    print(currentCompletion);
+                    habitProvider.setHabitCompletedOnDay(
+                        date, name, currentCompletion ? false : true);
+                  }
+                  // final currentCompletion = habitProvider.getHabitCompletion(date.toString().split(' ')[0], name);
+                  // habitProvider.setHabitCompletion(date.toString().split(' ')[0], name, currentCompletion ? false : true);
+                  // Provider.of<HabitProvider>(context, listen: false).toggleHabit(name, fullDayName);
+                },
           child: Container(
             child: Stack(
-		alignment: Alignment.center,
+              alignment: Alignment.center,
               children: [
                 // Background Circle
                 CircularProgressIndicator(
                   value: 1, // full circle as background
                   strokeWidth: getWidth(context, 2),
-                  valueColor: AlwaysStoppedAnimation<Color>(isDarkMode ? Colors.grey.shade800 : Colors.grey.shade400),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                      isDarkMode ? Colors.grey.shade800 : Colors.grey.shade400),
                 ),
                 // Progress Circle
                 CircularProgressIndicator(
@@ -114,7 +129,8 @@ class _DayProgressCircle extends StatelessWidget {
                   strokeWidth: getWidth(context, 2),
                   valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF099AA8)),
                 ),
-               Center(
+                // Center Number
+                Center(
                   child: present
                       ? Container(
                           decoration: BoxDecoration(
@@ -130,9 +146,9 @@ class _DayProgressCircle extends StatelessWidget {
                                             ? Colors.transparent
                                             : Colors.white))
                                     : Colors.transparent),
-				shape: BoxShape.circle,
+                            shape: BoxShape.circle,
                           ),
-                          padding: EdgeInsets.all(getWidth(context, 11)),
+                          padding: EdgeInsets.all(getWidth(context, 12)),
                           child: Text(
                             isTop
                                 ? date.day.toString()
@@ -146,12 +162,11 @@ class _DayProgressCircle extends StatelessWidget {
                           ),
                         )
                       : const SizedBox.shrink(),
-                )
+                ),
               ],
             ),
           ),
         ),
-     
       ],
     );
   }
