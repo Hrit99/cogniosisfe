@@ -145,22 +145,32 @@ class _MyHomePageState extends State<MyHomePage> {
   // define config here for recorder
   static const config = RecordConfig(
     encoder: AudioEncoder.pcm16bits,
-    bitRate: 48000 *
-        2 *
+    bitRate: 48000 * 2 *
         16, // 48000 samples per second * 2 channels (stereo) * 16 bits per sample
     sampleRate: 48000,
+    androidConfig: AndroidRecordConfig(
+      audioSource: AndroidAudioSource.mic,
+      muteAudio: false,
+    ),
+    iosConfig: IosRecordConfig(
+      categoryOptions: [
+        IosAudioCategoryOption.allowBluetooth,
+        IosAudioCategoryOption.defaultToSpeaker
+      ],
+    ),
     numChannels: 1,
     autoGain: true,
     echoCancel: true,
     noiseSuppress: true,
   );
   static final audioInputBufferSize = config.bitRate ~/
-      10; // bitrate is "number of bits per second". Dividing by 10 should buffer approximately 100ms of audio at a time.
+      500; // bitrate is "number of bits per second". Dividing by 10 should buffer approximately 100ms of audio at a time.
 
   final AudioPlayer _audioPlayer = AudioPlayer();
   final AudioRecorder _audioRecorder = AudioRecorder();
   WebSocketChannel? _chatChannel;
   bool _isConnected = false;
+  //bool _isMuted = false;
   var chatEntries = <ChatEntry>[];
 
   // As EVI speaks, it will send audio segments to be played back. Sometimes a new segment
@@ -176,14 +186,15 @@ class _MyHomePageState extends State<MyHomePage> {
   // of a message from EVI, parses it into a `ChatMessage` type and adds it to `chatEntries` so
   // it can be displayed.
   void appendNewChatMessage(evi.ChatMessage chatMessage, evi.Inference models) {
-    // final role = chatMessage.role == 'assistant' ? Role.assistant : Role.user;
-    // final entry = ChatEntry(
-    //     role: role,
-    //     timestamp: DateTime.now().toString(),
-    //     content: chatMessage.content,
-    //     scores: MyApp.extractTopThreeEmotions(models));
-
-    //   chatEntries.add(entry);
+    final role = chatMessage.role == 'assistant' ? Role.assistant : Role.user;
+    final entry = ChatEntry(
+        role: role,
+        timestamp: DateTime.now().toString(),
+        content: chatMessage.content,
+        scores: MyApp.extractTopThreeEmotions(models));
+    setState(() {
+      chatEntries.add(entry);
+    });
   }
 
   @override
@@ -276,15 +287,13 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     final AudioContext audioContext = AudioContext(
       iOS: AudioContextIOS(
-        category: AVAudioSessionCategory.playAndRecord,
-        options: const {
-          AVAudioSessionOptions.defaultToSpeaker,
-        },
+        category: AVAudioSessionCategory.playback,
+    
       ),
       android: AudioContextAndroid(
         isSpeakerphoneOn: false,
-        audioMode: AndroidAudioMode.normal,
-        stayAwake: false,
+        audioMode: AndroidAudioMode.inCall,
+        stayAwake: true,
         contentType: AndroidContentType.speech,
         usageType: AndroidUsageType.voiceCommunication,
         audioFocus: AndroidAudioFocus.gain,
@@ -294,6 +303,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _audioPlayer.onPlayerComplete.listen((event) {
       _playNextAudioSegment();
     });
+
 
     // Automatically connect when the screen renders
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -318,6 +328,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _stopTune() {
     try {
       _tunePlayer.stop();
+      _tunePlayer.dispose();
     } catch (e) {
       debugPrint("Error stopping tune: $e");
     }
@@ -335,6 +346,7 @@ class _MyHomePageState extends State<MyHomePage> {
       print(
           "ConfigManager.instance.humeConfigId: ${ConfigManager.instance.humeConfigId}");
       setState(() {
+        _stopTune();
         _isConnected = true;
       });
       // if (ConfigManager.instance.humeApiKey.isNotEmpty &&
@@ -359,77 +371,62 @@ class _MyHomePageState extends State<MyHomePage> {
 
       print("uri: $uri");
 
-      _chatChannel!.stream.listen(
-        (event) async {
-          try {
-            final message = evi.EviMessage.decode(event);
-            debugPrint("Received message: ${message.type}");
-            // Stop the tune when a message is received
-            _stopTune();
-            print("message: $message");
-            // This message contains audio data for playback.
-            switch (message) {
-              case (evi.ErrorMessage errorMessage):
-                debugPrint("Error: ${errorMessage.message}");
-                break;
-              case (evi.ChatMetadataMessage chatMetadataMessage):
-                debugPrint("Chat metadata: ${chatMetadataMessage.rawJson}");
-                _prepareAudioSettings();
-                _startRecording();
-                break;
-              case (evi.AudioOutputMessage audioOutputMessage):
-              print("audioOutputMessage: ${audioOutputMessage.rawJson}");
-                final data = audioOutputMessage.data;
-                final rawAudio = base64Decode(data);
-                Source source;
-                if (!kIsWeb) {
-                  source = _urlSourceFromBytes(rawAudio);
-                } else {
-                  source = BytesSource(rawAudio);
-                }
-
-
-                 _enqueueAudioSegment(source);
-                break;
-              case (evi.UserInterruptionMessage _):
-                _handleInterruption();
-                break;
-              // These messages contain the transcript text of the user's or the assistant's speech
-              // as well as emotional analysis of the speech.
-              case (evi.AssistantMessage assistantMessage):
-                print("assistantMessage: ${assistantMessage.message.content}");
-                print(
-                    "assistantMessage.models: ${assistantMessage.message.role}");
-                appendNewChatMessage(
-                    assistantMessage.message, assistantMessage.models);
-                break;
-              case (evi.UserMessage userMessage):
-                print("userMessage: ${userMessage.message.content}");
-                print("userMessage.models: ${userMessage.message.role}");
-                appendNewChatMessage(userMessage.message, userMessage.models);
-                _handleInterruption();
-                break;
-              case (evi.UnknownMessage unknownMessage):
-                debugPrint("Unknown message: ${unknownMessage.rawJson}");
-              
-                 // _sendAudio(_audioInputBuffer);
-                  _audioInputBuffer.clear();
-                
-                break;
+     _chatChannel!.stream.listen(
+      (event) async {
+        final message = evi.EviMessage.decode(event);
+        debugPrint("Received message: ${message.type}");
+        // This message contains audio data for playback.
+        switch (message) {
+          case (evi.ErrorMessage errorMessage):
+            debugPrint("Error: ${errorMessage.message}");
+            break;
+          case (evi.ChatMetadataMessage chatMetadataMessage):
+            debugPrint("Chat metadata: ${chatMetadataMessage.rawJson}");
+            _prepareAudioSettings();
+            _startRecording();
+            break;
+          case (evi.AudioOutputMessage audioOutputMessage):
+            final data = audioOutputMessage.data;
+            final rawAudio = base64Decode(data);
+            Source source;
+            if (!kIsWeb) {
+              source = _urlSourceFromBytes(rawAudio);
+            } else {
+              source = BytesSource(rawAudio);
             }
-          } catch (e) {
-            debugPrint("Error processing message: $e");
-          }
-        },
-        onError: (error) {
-          debugPrint("Connection error: $error");
-          _handleConnectionClosed();
-        },
-        onDone: () {
-          debugPrint("Connection closed");
-          _handleConnectionClosed();
-        },
-      );
+            print("Source:");
+             _enqueueAudioSegment(source);
+            // _audioPlayer.play(source);
+            break;
+          case (evi.UserInterruptionMessage _):
+            _handleInterruption();
+            break;
+          // These messages contain the transcript text of the user's or the assistant's speech
+          // as well as emotional analysis of the speech.
+          case (evi.AssistantMessage assistantMessage):
+          print("Assistant message: ${assistantMessage.message.content}");
+            appendNewChatMessage(
+                assistantMessage.message, assistantMessage.models);
+            break;
+          case (evi.UserMessage userMessage):
+          print("User message: ${userMessage.message.content}");
+            appendNewChatMessage(userMessage.message, userMessage.models);
+            _handleInterruption();
+            break;
+          case (evi.UnknownMessage unknownMessage):
+            debugPrint("Unknown message: ${unknownMessage.rawJson}");
+            break;
+        }
+      },
+      onError: (error) {
+        debugPrint("Connection error: $error");
+        _handleConnectionClosed();
+      },
+      onDone: () {
+        debugPrint("Connection closed");
+        _handleConnectionClosed();
+      },
+    );
 
       debugPrint("Connected");
     } catch (e) {
@@ -452,18 +449,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _enqueueAudioSegment(Source audioSegment) {
-    try {
-      debugPrint("Enqueueing audio segment");
-      if (!_isConnected) {
-        return;
-      }
-      if (_audioPlayer.state == PlayerState.playing) {
-         _playbackAudioQueue.add(audioSegment);
-      } else {
-        _audioPlayer.play(audioSegment);
-      }
-    } catch (e) {
-      debugPrint("Error enqueuing audio segment: $e");
+    debugPrint("Enqueueing audio segment");
+    if (!_isConnected) {
+      return;
+    }
+    if (_audioPlayer.state == PlayerState.playing) {
+      _playbackAudioQueue.add(audioSegment);
+    } else {
+      _audioPlayer.play(audioSegment);
     }
   }
 
@@ -479,24 +472,16 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _handleConnectionClosed() {
-    try {
-      setState(() {
-        _isConnected = false;
-      });
-      _audioInputBuffer.clear();
-      _stopRecording();
-    } catch (e) {
-      debugPrint("Error handling connection closed: $e");
-    }
+    setState(() {
+      _isConnected = false;
+    });
+    _audioInputBuffer.clear();
+    _stopRecording();
   }
 
   void _handleInterruption() {
-    try {
-      _playbackAudioQueue.clear();
-      _audioPlayer.stop();
-    } catch (e) {
-      debugPrint("Error handling interruption: $e");
-    }
+    _playbackAudioQueue.clear();
+    _audioPlayer.stop();
   }
 
   void _playNextAudioSegment() {
@@ -511,65 +496,52 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _prepareAudioSettings() {
-    try {
-      // set session settings to prepare EVI for receiving linear16 encoded audio
-      // https://dev.hume.ai/docs/empathic-voice-interface-evi/configuration#session-settings
-      _chatChannel!.sink.add(jsonEncode({
-        'type': 'session_settings',
-        'audio': {
-          'encoding': 'linear16',
-          'sample_rate': 48000,
-          'channels': 1,
-        },
-      }));
-    } catch (e) {
-      debugPrint("Error preparing audio settings: $e");
-    }
+    // set session settings to prepare EVI for receiving linear16 encoded audio
+    // https://dev.hume.ai/docs/empathic-voice-interface-evi/configuration#session-settings
+    _chatChannel!.sink.add(jsonEncode({
+      'type': 'session_settings',
+      'audio': {
+        'encoding': 'linear16',
+        'sample_rate': 48000,
+        'channels': 1,
+      },
+    }));
   }
 
   void _sendAudio(List<int> audioBytes) {
-    try {
-      final base64 = base64Encode(audioBytes);
-      _chatChannel!.sink.add(jsonEncode({
-        'type': 'audio_input',
-        'data': base64,
-      }));
-    } catch (e) {
-      debugPrint("Error sending audio: $e");
-    }
+    final base64 = base64Encode(audioBytes);
+    _chatChannel!.sink.add(jsonEncode({
+      'type': 'audio_input',
+      'data': base64,
+    }));
   }
 
   void _startRecording() async {
-    try {
-      if (!await _audioRecorder.hasPermission()) {
-        return;
-      }
-      final audioStream = await _audioRecorder.startStream(config);
-
-      audioStream.listen((data) async {
-        // Filter out any audio data that might be from played audio
-        if (_isConnected) {
-          _audioInputBuffer.addAll(data);
-
-          if (_audioInputBuffer.length >= audioInputBufferSize) {
-            final bufferWasEmpty =
-                !_audioInputBuffer.any((element) => element != 0);
-            if (bufferWasEmpty) {
-              _audioInputBuffer = [];
-              return;
-            }
-            _sendAudio(_audioInputBuffer);
-            _audioInputBuffer = [];
-          }
-        }
-      });
-      audioStream.handleError((error) {
-        debugPrint("Error recording audio: $error");
-      });
-    } catch (e) {
-      debugPrint("Error starting recording: $e");
+    if (!await _audioRecorder.hasPermission()) {
+      return;
     }
+
+    final audioStream = await _audioRecorder.startStream(config);
+
+    audioStream.listen((data) async {
+      _audioInputBuffer.addAll(data);
+
+      if (_audioInputBuffer.length >= audioInputBufferSize) {
+        final bufferWasEmpty =
+            !_audioInputBuffer.any((element) => element != 0);
+        if (bufferWasEmpty) {
+          _audioInputBuffer = [];
+          return;
+        }
+        _sendAudio(_audioInputBuffer);
+        _audioInputBuffer = [];
+      }
+    });
+    audioStream.handleError((error) {
+      debugPrint("Error recording audio: $error");
+    });
   }
+
 
   void _stopRecording() {
     try {
