@@ -169,6 +169,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final AudioPlayer _audioPlayer = AudioPlayer();
   final AudioRecorder _audioRecorder = AudioRecorder();
+   static const _platform = MethodChannel('com.example.audio');
   WebSocketChannel? _chatChannel;
   bool _isConnected = false;
   //bool _isMuted = false;
@@ -181,19 +182,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // Holds bytes of audio recorded from the user's microphone.
   List<int> _audioInputBuffer = <int>[];
-
-
-  static const MethodChannel _channel = MethodChannel('com.example.audio');
-
-  Future<void> _setVoiceChatMode() async {
-    try {
-      await _channel.invokeMethod('setVoiceChatMode');
-      print("Voice chat mode set successfully.");
-    } catch (e) {
-      print("Error: $e");
-    }
-  }
-
 
   // EVI sends back transcripts of both the user's speech and the assistants speech, along
   // with an analysis of the emotional content of the speech. This method takes
@@ -331,10 +319,18 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
     // Play the tune repeatedly when the screen is rendered
-    _playTune();
+    // _playTune();
   }
 
 
+    Future<void> _setVoiceChatMode() async {
+    try {
+      await _platform.invokeMethod('setVoiceChatMode');
+      print("Voice chat mode set successfully.");
+    } on PlatformException catch (e) {
+      print("Failed to set voice chat mode: ${e.message}");
+    }
+  }
 
   final AudioPlayer _tunePlayer = AudioPlayer();
 
@@ -368,7 +364,7 @@ class _MyHomePageState extends State<MyHomePage> {
       print(
           "ConfigManager.instance.humeConfigId: ${ConfigManager.instance.humeConfigId}");
       setState(() {
-        _stopTune();
+        // _stopTune();
         _isConnected = true;
       });
       // if (ConfigManager.instance.humeApiKey.isNotEmpty &&
