@@ -149,14 +149,15 @@ class _MyHomePageState extends State<MyHomePage> {
         16, // 48000 samples per second * 2 channels (stereo) * 16 bits per sample
     sampleRate: 48000,
     androidConfig: AndroidRecordConfig(
-      audioSource: AndroidAudioSource.mic,
+      audioSource: AndroidAudioSource.voiceCommunication,
       muteAudio: false,
     ),
     iosConfig: IosRecordConfig(
       categoryOptions: [
+        IosAudioCategoryOption.defaultToSpeaker,
         IosAudioCategoryOption.allowBluetooth,
-        IosAudioCategoryOption.defaultToSpeaker
       ],
+      manageAudioSession: false
     ),
     numChannels: 1,
     autoGain: true,
@@ -180,6 +181,19 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // Holds bytes of audio recorded from the user's microphone.
   List<int> _audioInputBuffer = <int>[];
+
+
+  static const MethodChannel _channel = MethodChannel('com.example.audio');
+
+  Future<void> _setVoiceChatMode() async {
+    try {
+      await _channel.invokeMethod('setVoiceChatMode');
+      print("Voice chat mode set successfully.");
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
 
   // EVI sends back transcripts of both the user's speech and the assistants speech, along
   // with an analysis of the emotional content of the speech. This method takes
@@ -285,10 +299,14 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    _setVoiceChatMode();
     final AudioContext audioContext = AudioContext(
       iOS: AudioContextIOS(
-        category: AVAudioSessionCategory.playback,
-    
+        category: AVAudioSessionCategory.playAndRecord,
+        options: {
+          AVAudioSessionOptions.defaultToSpeaker,
+          AVAudioSessionOptions.allowBluetooth,
+        }
       ),
       android: AudioContextAndroid(
         isSpeakerphoneOn: false,
@@ -298,7 +316,9 @@ class _MyHomePageState extends State<MyHomePage> {
         usageType: AndroidUsageType.voiceCommunication,
         audioFocus: AndroidAudioFocus.gain,
       ),
+
     );
+
     AudioPlayer.global.setAudioContext(audioContext);
     _audioPlayer.onPlayerComplete.listen((event) {
       _playNextAudioSegment();
@@ -313,6 +333,8 @@ class _MyHomePageState extends State<MyHomePage> {
     // Play the tune repeatedly when the screen is rendered
     _playTune();
   }
+
+
 
   final AudioPlayer _tunePlayer = AudioPlayer();
 
@@ -533,6 +555,7 @@ class _MyHomePageState extends State<MyHomePage> {
           _audioInputBuffer = [];
           return;
         }
+        
         _sendAudio(_audioInputBuffer);
         _audioInputBuffer = [];
       }
@@ -563,3 +586,26 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 }
+
+// void configureAudioSession() async {
+//   final session = AVAudioSession.sharedInstance();
+
+//   try {
+//     // Set the category to play and record
+//     await session.setCategory(
+//       AVAudioSessionCategory.playAndRecord,
+//       options: [
+//         AVAudioSessionCategoryOptions.allowBluetooth,
+//         AVAudioSessionCategoryOptions.defaultToSpeaker,
+//       ],
+//     );
+
+//     // Set the mode to voice chat
+//     await session.setMode(AVAudioSessionMode.voiceChat);
+
+//     // Activate the audio session
+//     await session.setActive(true);
+//   } on PlatformException catch (e) {
+//     print("Failed to configure audio session: $e");
+//   }
+// }
