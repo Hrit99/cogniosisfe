@@ -287,7 +287,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    // _setVoiceChatMode();
+     _setVoiceChatMode();
     final AudioContext audioContext = AudioContext(
       iOS: AudioContextIOS(
         category: AVAudioSessionCategory.playAndRecord,
