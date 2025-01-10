@@ -308,6 +308,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
 
     AudioPlayer.global.setAudioContext(audioContext);
+     _audioPlayer.setPlaybackRate(0.9);
     _audioPlayer.onPlayerComplete.listen((event) {
       _playNextAudioSegment();
     });

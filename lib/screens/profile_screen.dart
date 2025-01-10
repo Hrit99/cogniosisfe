@@ -1,14 +1,22 @@
+import 'dart:convert';
+
 import 'package:cogniosis/dimensions.dart';
 import 'package:cogniosis/home_screen.dart';
 import 'package:cogniosis/screens/account_info_screen.dart';
+import 'package:cogniosis/screens/help_centre_screen.dart';
+import 'package:cogniosis/screens/reset_password_screen.dart';
+import 'package:cogniosis/screens/terms_service_screen.dart';
 import 'package:cogniosis/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:http/http.dart' as http;
 
 class ProfileScreen extends StatelessWidget {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Provider.of<ThemeProvider>(context).isDarkMode;
@@ -37,7 +45,9 @@ class ProfileScreen extends StatelessWidget {
             context,
             icon: Icons.lock,
             text: 'Reset Password',
-            onTap: () {},
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => ResetPasswordScreen()));
+            },
           ),
           _buildProfileOption(
             context,
@@ -49,13 +59,17 @@ class ProfileScreen extends StatelessWidget {
             context,
             icon: Icons.help,
             text: 'Help Centre',
-            onTap: () {},
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => HelpCentreScreen()));
+            },
           ),
           _buildProfileOption(
             context,
             icon: Icons.description,
             text: 'Terms of Services',
-            onTap: () {},
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => TermsOfServiceScreen()));
+            },
           ),
           _buildProfileOption(
             context,
@@ -99,6 +113,7 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildLogoutButton(BuildContext context) {
     return FutureBuilder<SharedPreferences>(
       future: SharedPreferences.getInstance(),
@@ -115,7 +130,7 @@ class ProfileScreen extends StatelessWidget {
               onPressed: () {
                 GoogleSignIn().signOut();
                 GoogleSignIn().disconnect();
-                prefs?.clear();
+                prefs?.remove('access_token');
                 Navigator.push(context, MaterialPageRoute(builder: (context) => SplashScreen()));
                 // Add settings button functionality here
               },
@@ -134,5 +149,72 @@ class ProfileScreen extends StatelessWidget {
         }
       },
     );
+  }
+
+  void _showResetPasswordDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Reset Password'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _emailController,
+                decoration: InputDecoration(labelText: 'Email'),
+              ),
+              TextField(
+                controller: _passwordController,
+                decoration: InputDecoration(labelText: 'New Password'),
+                obscureText: true,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: Text('Reset'),
+              onPressed: () {
+                _resetPassword(context);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _resetPassword(BuildContext context) async {
+    final email = _emailController.text;
+    final newPassword = _passwordController.text;
+
+    if (email.isEmpty || newPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please fill in all fields')),
+      );
+      return;
+    }
+
+    final url = Uri.parse(' /reset_password');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'new_password': newPassword}),
+    );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Password reset successfully')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to reset password: ${response.statusCode}')),
+      );
+    }
   }
 }

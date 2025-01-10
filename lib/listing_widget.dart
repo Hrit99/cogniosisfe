@@ -203,7 +203,18 @@ class _ListingWidgetState extends State<ListingWidget> {
 
   Widget _buildCardContent(ThemeProvider themeProvider, TaskProvider taskProvider, MusicProvider musicProvider, VideoProvider videoProvider, ExerciseProvider exerciseProvider) {
     if (widget.cardType == CardType.task) {
-      return _buildTaskCard(themeProvider, taskProvider);
+      return FutureBuilder(
+        future: taskProvider.loadTasks(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error loading tasks'));
+          } else {
+            return _buildTaskCard(themeProvider, taskProvider);
+          }
+        },
+      );
     } else {
       return _buildMediaCard(themeProvider, musicProvider, videoProvider, exerciseProvider);
     }

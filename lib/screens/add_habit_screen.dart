@@ -1,8 +1,11 @@
 import 'package:cogniosis/models/habit.dart';
 import 'package:cogniosis/providers/habit_provider.dart';
+import 'package:cogniosis/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cogniosis/dimensions.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class AddHabitScreen extends StatefulWidget {
@@ -349,7 +352,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     );
   }
 
-  void _createHabit(HabitProvider _habitProvider) {
+  Future<void> _createHabit(HabitProvider _habitProvider) async {
 
     // Implement habit creation logic here
     if (_nameController.text.isEmpty || _selectedSlot.isEmpty) {
@@ -359,7 +362,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       return;
     }
 
-    print(_selectedDays);
+      print(_selectedDays);
 
     List<String> fullDayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     Habit habit = Habit(
@@ -367,7 +370,18 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       time: _selectedSlot,
       days: _selectedDays.asMap().entries.map((entry) => entry.value ? fullDayNames[entry.key] : '').where((day) => day.isNotEmpty).toList(),
     );
-    _habitProvider.addHabit(habit);
+    bool success = await _habitProvider.addHabit(habit);
+    if (!success) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('access_token');
+      GoogleSignIn().signOut();
+      GoogleSignIn().disconnect();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => SplashScreen()),
+      );
+      return;
+    }
     // Create habit logic here
     Navigator.pop(context);
   }

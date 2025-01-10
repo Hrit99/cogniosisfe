@@ -7,17 +7,20 @@ class MoodProvider with ChangeNotifier {
   Map<String, String> get moodData => _moodData;
 
   Future<void> loadMoodData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final keys = prefs.getKeys();
-    _moodData = {for (var key in keys) key: prefs.getString(key) ?? ''};
-    notifyListeners();
+
+      final prefs = await SharedPreferences.getInstance();
+      final keys = prefs.getKeys(); 
+
+      _moodData = {for (var key in keys) if (key.startsWith('mood_')) key.replaceFirst('mood_', ''): prefs.getString(key) ?? ''};
+      notifyListeners();
+
   }
 
   Future<void> setMood(String date, String mood) async {
+
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(date, mood);
+    await prefs.setString('mood_${date}', mood);
     _moodData[date] = mood;
-    print('Mood set for date: $date, mood: $mood');
     notifyListeners();
   }
 

@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Task {
   final int id;
@@ -26,6 +30,47 @@ class Task {
 
 class TaskProvider with ChangeNotifier {
   final List<Task> _tasks = [];
+
+  Future<void> loadTasks() async {
+    final url = Uri.parse('https://cogniosisbe-1366da2257bb.herokuapp.com/tasks');
+    String accessToken = "";
+    final prefs = await SharedPreferences.getInstance();
+    accessToken = prefs.getString('access_token') ?? "";
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+    if (response.statusCode == 200) {
+      final List<dynamic> taskList = jsonDecode(response.body);
+      final List<Task> loadedTasks = taskList.map((taskData) {
+        return Task(
+          id: taskData['id'],
+          title: taskData['title'],
+          duration: Duration(
+            hours: int.parse(taskData['duration'].split(':')[0]),
+            minutes: int.parse(taskData['duration'].split(':')[1]),
+            seconds: int.parse(taskData['duration'].split(':')[2]),
+          ),
+          date: DateTime.parse(taskData['date']),
+          image: taskData['image'],
+          isCompleted: taskData['is_completed'],
+          durationCompleted: Duration(
+            hours: int.parse(taskData['duration_completed'].split(':')[0]),
+            minutes: int.parse(taskData['duration_completed'].split(':')[1]),
+            seconds: int.parse(taskData['duration_completed'].split(':')[2]),
+          ),
+          note: taskData['note'],
+        );
+      }).toList();
+      print(loadedTasks);
+      setTasks(loadedTasks);
+      return ;
+    } else {
+      throw Exception('Failed to load tasks');
+    }
+  }
 
   List<Task> getTasksByCategory(String category) {
     if (category == 'All') {
@@ -71,6 +116,6 @@ class TaskProvider with ChangeNotifier {
   void setTasks(List<Task> tasks) {
     _tasks.clear();
     _tasks.addAll(tasks);
-    notifyListeners();
+    // notifyListeners();
   }
 }
