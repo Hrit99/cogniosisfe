@@ -30,7 +30,7 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
         children: [
           // Background Image with Tint
           Positioned.fill(
-            child: Image.asset(
+            child: Image.network(
               widget.mediaItem.image,
               fit: BoxFit.cover,
             ),
