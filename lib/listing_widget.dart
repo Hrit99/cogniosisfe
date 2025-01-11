@@ -414,7 +414,7 @@ class _ListingWidgetState extends State<ListingWidget> {
                   },
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(mediaItem.image, height: getWidth(context, 187), width: MediaQuery.of(context).size.width, fit: BoxFit.cover,),
+                    child: Image.network(mediaItem.image, height: getWidth(context, 187), width: MediaQuery.of(context).size.width, fit: BoxFit.cover,),
                   ),
                 ),
                 SizedBox(height: getHeight(context, 10)),
@@ -520,7 +520,7 @@ class _ListingWidgetState extends State<ListingWidget> {
                   },
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(mediaItem.image, height: getWidth(context, 187), width: MediaQuery.of(context).size.width, fit: BoxFit.cover,),
+                    child: Image.network(mediaItem.image, height: getWidth(context, 187), width: MediaQuery.of(context).size.width, fit: BoxFit.cover,),
                   ),
                 ),
                 SizedBox(height: getHeight(context, 10)),
@@ -633,7 +633,7 @@ class _ListingWidgetState extends State<ListingWidget> {
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12),
-                          child: Image.asset(mediaItem.image, height: getWidth(context, 68), width: getWidth(context, 68), fit: BoxFit.cover,),
+                          child: Image.network(mediaItem.image, height: getWidth(context, 68), width: getWidth(context, 68), fit: BoxFit.cover,),
                         ),
                         SizedBox(width: getWidth(context, 10)),
                           Column(
@@ -757,7 +757,7 @@ class _ListingWidgetState extends State<ListingWidget> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: Image.asset(mediaItem.image, height: getWidth(context, 68), width: getWidth(context, 68), fit: BoxFit.cover,),
+                        child: Image.network(mediaItem.image, height: getWidth(context, 68), width: getWidth(context, 68), fit: BoxFit.cover,),
                       ),
                       SizedBox(width: getWidth(context, 10)),
                         Column(
