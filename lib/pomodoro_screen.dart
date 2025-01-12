@@ -46,51 +46,52 @@ class PomodoroScreen extends StatelessWidget {
 
     for (var task in tasks) {
       final day = task.date.weekday;
-      switch (day) {
-        case DateTime.monday:
-          weekData['Mon']!['completed'] = (weekData['Mon']!['completed'] as int) +
-              ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
-          break;
-        case DateTime.tuesday:
-          weekData['Tue']!['completed'] = (weekData['Tue']!['completed'] as int) +
-              ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
-          break;
-        case DateTime.wednesday:
-          weekData['Wed']!['completed'] = (weekData['Wed']!['completed'] as int) +
-              ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
-          break;
-        case DateTime.thursday:
-          weekData['Thur']!['completed'] = (weekData['Thur']!['completed'] as int) +
-              ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
-          break;
-        case DateTime.friday:
-          weekData['Fri']!['completed'] = (weekData['Fri']!['completed'] as int) +
-              ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
-          break;
-        case DateTime.saturday:
-          weekData['Sat']!['completed'] = (weekData['Sat']!['completed'] as int) +
-              ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
-          break;
-        case DateTime.sunday:
-          weekData['Sun']!['completed'] = (weekData['Sun']!['completed'] as int) +
-              ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
-          break;
-        default:
-          break;
-      }
+      print(day);
+      // switch (day) {
+      //   case DateTime.monday:
+      //     weekData['Mon']!['completed'] = (weekData['Mon']!['completed'] as int) +
+      //         ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
+      //     break;
+      //   case DateTime.tuesday:
+      //     weekData['Tue']!['completed'] = (weekData['Tue']!['completed'] as int) +
+      //         ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
+      //     break;
+      //   case DateTime.wednesday:
+      //     weekData['Wed']!['completed'] = (weekData['Wed']!['completed'] as int) +
+      //         ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
+      //     break;
+      //   case DateTime.thursday:
+      //     weekData['Thur']!['completed'] = (weekData['Thur']!['completed'] as int) +
+      //         ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
+      //     break;
+      //   case DateTime.friday:
+      //     weekData['Fri']!['completed'] = (weekData['Fri']!['completed'] as int) +
+      //         ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
+      //     break;
+      //   case DateTime.saturday:
+      //     weekData['Sat']!['completed'] = (weekData['Sat']!['completed'] as int) +
+      //         ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
+      //     break;
+      //   case DateTime.sunday:
+      //     weekData['Sun']!['completed'] = (weekData['Sun']!['completed'] as int) +
+      //         ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
+      //     break;
+      //   default:
+      //     break;
+      // }
       
       }
 
-    // for (var entry in weekData.entries) {
-    //   try {
-    //     final taskDate = DateTime.parse(entry.value['date'] as String);
-    //     int taskCount = tasks.where((task) => task.date.weekday == taskDate.weekday).length;
-    //     entry.value['completed'] = ((entry.value['completed'] as int) ~/ (taskCount > 0 ? taskCount : 1));
-    //   } catch (e) {
-    //     print('Error parsing date: $e');
-    //     entry.value['completed'] = 0; // or some default value
-    //   }
-    // }
+    for (var entry in weekData.entries) {
+      try {
+        final taskDate = DateTime.parse(entry.value['date'] as String);
+        int taskCount = tasks.where((task) => task.date.weekday == taskDate.weekday).length;
+        entry.value['completed'] = ((entry.value['completed'] as int) ~/ (taskCount > 0 ? taskCount : 1));
+      } catch (e) {
+        print('Error parsing date: $e');
+        entry.value['completed'] = 0; // or some default value
+      }
+    }
     return weekData;
   }
 
@@ -98,9 +99,10 @@ class PomodoroScreen extends StatelessWidget {
     @override
   Widget build(BuildContext context) {
     final taskProvider = Provider.of<TaskProvider>(context);
+    List<Task> tasks = taskProvider.getWeekData();
 
     // Transform the List<Task> into a Map<String, int>
-     final weekData = _transformTasksToWeekData(taskProvider.getWeekData());
+    final weekData = _transformTasksToWeekData(tasks);
     print(weekData);
     return Scaffold(
       appBar: AppBar(
