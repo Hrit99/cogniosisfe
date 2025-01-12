@@ -13,8 +13,8 @@ class PomodoroScreen extends StatelessWidget {
     final taskProvider = Provider.of<TaskProvider>(context);
 
     // Transform the List<Task> into a Map<String, int>
-    final weekData = _transformTasksToWeekData(taskProvider.getWeekData());
-    print(weekData);
+    // final weekData = _transformTasksToWeekData(taskProvider.getWeekData());
+    print(taskProvider.getWeekData());
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
@@ -32,81 +32,81 @@ class PomodoroScreen extends StatelessWidget {
   }
 
   
-  Map<String, Map<String, Object>> _transformTasksToWeekData(List<Task> tasks) {
-    DateTime now = DateTime.now();
-    DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-    Map<String, Map<String, Object>> weekData = {
-      'Mon': {
-        "completed": 0,
-        "date": startOfWeek.toString(),
-      },
-      'Tue': {
-        "completed": 0,
-        "date": startOfWeek.add(Duration(days: 1)).toString(),
-      },
-      'Wed': {
-        "completed": 0,
-        "date": startOfWeek.add(Duration(days: 2)).toString(),
-      },
-      'Thur': {
-        "completed": 0,
-        "date": startOfWeek.add(Duration(days: 3)).toString(),
-      },
-      'Fri': {
-        "completed": 0,
-        "date": startOfWeek.add(Duration(days: 4)).toString(),
-      },
-      'Sat': {
-        "completed": 0,
-        "date": startOfWeek.add(Duration(days: 5)).toString(),
-      },
-      'Sun': {
-        "completed": 0,
-        "date": startOfWeek.add(Duration(days: 6)).toString(),
-      },
-    };
+  // Map<String, Map<String, Object>> _transformTasksToWeekData(List<Task> tasks) {
+  //   DateTime now = DateTime.now();
+  //   DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+  //   Map<String, Map<String, Object>> weekData = {
+  //     'Mon': {
+  //       "completed": 0,
+  //       "date": startOfWeek.toString(),
+  //     },
+  //     'Tue': {
+  //       "completed": 0,
+  //       "date": startOfWeek.add(Duration(days: 1)).toString(),
+  //     },
+  //     'Wed': {
+  //       "completed": 0,
+  //       "date": startOfWeek.add(Duration(days: 2)).toString(),
+  //     },
+  //     'Thur': {
+  //       "completed": 0,
+  //       "date": startOfWeek.add(Duration(days: 3)).toString(),
+  //     },
+  //     'Fri': {
+  //       "completed": 0,
+  //       "date": startOfWeek.add(Duration(days: 4)).toString(),
+  //     },
+  //     'Sat': {
+  //       "completed": 0,
+  //       "date": startOfWeek.add(Duration(days: 5)).toString(),
+  //     },
+  //     'Sun': {
+  //       "completed": 0,
+  //       "date": startOfWeek.add(Duration(days: 6)).toString(),
+  //     },
+  //   };
 
-    for (var task in tasks) {
-      final day = task.date.weekday;
-      switch (day) {
-        case DateTime.monday:
-          weekData['Mon']!['completed'] = (weekData['Mon']!['completed'] as int) +
-              ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
-          break;
-        case DateTime.tuesday:
-          weekData['Tue']!['completed'] = (weekData['Tue']!['completed'] as int) +
-              ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
-          break;
-        case DateTime.wednesday:
-          weekData['Wed']!['completed'] = (weekData['Wed']!['completed'] as int) +
-              ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
-          break;
-        case DateTime.thursday:
-          weekData['Thur']!['completed'] = (weekData['Thur']!['completed'] as int) +
-              ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
-          break;
-        case DateTime.friday:
-          weekData['Fri']!['completed'] = (weekData['Fri']!['completed'] as int) +
-              ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
-          break;
-        case DateTime.saturday:
-          weekData['Sat']!['completed'] = (weekData['Sat']!['completed'] as int) +
-              ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
-          break;
-        case DateTime.sunday:
-          weekData['Sun']!['completed'] = (weekData['Sun']!['completed'] as int) +
-              ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
-          break;
-        default:
-          break;
-      }
+  //   for (var task in tasks) {
+  //     final day = task.date.weekday;
+  //     switch (day) {
+  //       case DateTime.monday:
+  //         weekData['Mon']!['completed'] = (weekData['Mon']!['completed'] as int) +
+  //             ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
+  //         break;
+  //       case DateTime.tuesday:
+  //         weekData['Tue']!['completed'] = (weekData['Tue']!['completed'] as int) +
+  //             ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
+  //         break;
+  //       case DateTime.wednesday:
+  //         weekData['Wed']!['completed'] = (weekData['Wed']!['completed'] as int) +
+  //             ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
+  //         break;
+  //       case DateTime.thursday:
+  //         weekData['Thur']!['completed'] = (weekData['Thur']!['completed'] as int) +
+  //             ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
+  //         break;
+  //       case DateTime.friday:
+  //         weekData['Fri']!['completed'] = (weekData['Fri']!['completed'] as int) +
+  //             ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
+  //         break;
+  //       case DateTime.saturday:
+  //         weekData['Sat']!['completed'] = (weekData['Sat']!['completed'] as int) +
+  //             ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
+  //         break;
+  //       case DateTime.sunday:
+  //         weekData['Sun']!['completed'] = (weekData['Sun']!['completed'] as int) +
+  //             ((task.durationCompleted.inSeconds * 100) ~/ task.duration.inSeconds);
+  //         break;
+  //       default:
+  //         break;
+  //     }
       
-      }
+  //     }
 
-    for (var entry in weekData.entries) {
-      int taskCount = tasks.where((task) => task.date.weekday == (DateTime.parse(entry.value['date'] as String)).weekday).length;
-      entry.value['completed'] = ((entry.value['completed'] as int) ~/ (taskCount > 0 ? taskCount : 1));
-    }
-    return weekData;
-  }
+  //   for (var entry in weekData.entries) {
+  //     int taskCount = tasks.where((task) => task.date.weekday == (DateTime.parse(entry.value['date'] as String)).weekday).length;
+  //     entry.value['completed'] = ((entry.value['completed'] as int) ~/ (taskCount > 0 ? taskCount : 1));
+  //   }
+  //   return weekData;
+  // }
 }
