@@ -22,138 +22,138 @@ class PomodoroScreen extends StatelessWidget {
     final weekData = _transformTasksToWeekData(taskProvider.getWeekData());
     print(weekData);
     return Scaffold(
-      backgroundColor: isDarkMode ? Colors.grey[900] : Colors.grey[200],
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: Image.network(
-                'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/manstandingontop.jpeg', // Replace with your background image asset
-                fit: BoxFit.cover,
-              ),
-            ),
-            Positioned.fill(
-              child: Container(
-                color: isDarkMode
-                    ? Colors.black.withOpacity(0.8)
-                    : Colors.white.withOpacity(0.8),
-              ),
-            ),
-            Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(
-                    right: getWidth(context, 200),
-                    left: getWidth(context, 10),
-                    top: getHeight(context, 30),
-                  ),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.arrow_back),
-                        color: isDarkMode ? Colors.white : Colors.black,
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      Expanded(
-                        child: Text(
-                          title,
-                          style: TextStyle(
-                            color: isDarkMode ? Colors.white : Colors.black,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: getWidth(context, 0),
-                      vertical: getHeight(context, 10)),
-                  child: WeekProgressWidget(
-                    weekData: weekData,
-                  ),
-                ),
-                Container(
-                  width: getWidth(context, 362),
-                  margin:
-                      EdgeInsets.symmetric(vertical: getHeight(context, 20)),
-                  padding: EdgeInsets.all(getWidth(context, 30)),
-                  decoration: BoxDecoration(
-                    color: isDarkMode
-                        ? Colors.black.withOpacity(0.7)
-                        : Colors.white.withOpacity(0.7),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isDarkMode
-                          ? Colors.white.withOpacity(0.2)
-                          : Colors.black.withOpacity(0.2),
-                      style: BorderStyle.solid,
-                    ),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => AddTaskScreen(isDarkMode: isDarkMode)),
-                          );
-                        },
-                        icon: Icon(
-                          Icons.add_circle,
-                          color: Color(0xFF3CC7D4),
-                          size: getHeight(context, 40),
-                      ),
-                      ),
-                      SizedBox(height: getHeight(context, 10)),
-                      Text(
-                        'Add Task',
-                        style: TextStyle(
-                          color: isDarkMode ? Colors.white : Colors.black,
-                          fontSize: getHeight(context, 18),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: getHeight(context, 5)),
-                      Text(
-                        'Schedule your goals',
-                        style: TextStyle(
-                          color: isDarkMode
-                              ? Colors.white.withOpacity(0.7)
-                              : Colors.black.withOpacity(0.7),
-                          fontSize: getHeight(context, 14),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+      backgroundColor: isDarkMode ? Colors.grey[900] : const Color.fromARGB(255, 204, 6, 6),
+      // body: SafeArea(
+      //   child: Stack(
+      //     children: [
+      //       Positioned.fill(
+      //         child: Image.network(
+      //           'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/manstandingontop.jpeg', // Replace with your background image asset
+      //           fit: BoxFit.cover,
+      //         ),
+      //       ),
+      //       Positioned.fill(
+      //         child: Container(
+      //           color: isDarkMode
+      //               ? Colors.black.withOpacity(0.8)
+      //               : Colors.white.withOpacity(0.8),
+      //         ),
+      //       ),
+      //       Column(
+      //         children: [
+      //           Padding(
+      //             padding: EdgeInsets.only(
+      //               right: getWidth(context, 200),
+      //               left: getWidth(context, 10),
+      //               top: getHeight(context, 30),
+      //             ),
+      //             child: Row(
+      //               children: [
+      //                 IconButton(
+      //                   icon: Icon(Icons.arrow_back),
+      //                   color: isDarkMode ? Colors.white : Colors.black,
+      //                   onPressed: () => Navigator.pop(context),
+      //                 ),
+      //                 Expanded(
+      //                   child: Text(
+      //                     title,
+      //                     style: TextStyle(
+      //                       color: isDarkMode ? Colors.white : Colors.black,
+      //                       fontSize: 20,
+      //                       fontWeight: FontWeight.w600,
+      //                     ),
+      //                     textAlign: TextAlign.center,
+      //                   ),
+      //                 ),
+      //               ],
+      //             ),
+      //           ),
+      //           Padding(
+      //             padding: EdgeInsets.symmetric(
+      //                 horizontal: getWidth(context, 0),
+      //                 vertical: getHeight(context, 10)),
+      //             child: WeekProgressWidget(
+      //               weekData: weekData,
+      //             ),
+      //           ),
+      //           Container(
+      //             width: getWidth(context, 362),
+      //             margin:
+      //                 EdgeInsets.symmetric(vertical: getHeight(context, 20)),
+      //             padding: EdgeInsets.all(getWidth(context, 30)),
+      //             decoration: BoxDecoration(
+      //               color: isDarkMode
+      //                   ? Colors.black.withOpacity(0.7)
+      //                   : Colors.white.withOpacity(0.7),
+      //               borderRadius: BorderRadius.circular(12),
+      //               border: Border.all(
+      //                 color: isDarkMode
+      //                     ? Colors.white.withOpacity(0.2)
+      //                     : Colors.black.withOpacity(0.2),
+      //                 style: BorderStyle.solid,
+      //               ),
+      //             ),
+      //             child: Column(
+      //               mainAxisSize: MainAxisSize.min,
+      //               children: [
+      //                 IconButton(
+      //                   onPressed: () {
+      //                     Navigator.push(
+      //                       context,
+      //                       MaterialPageRoute(builder: (context) => AddTaskScreen(isDarkMode: isDarkMode)),
+      //                     );
+      //                   },
+      //                   icon: Icon(
+      //                     Icons.add_circle,
+      //                     color: Color(0xFF3CC7D4),
+      //                     size: getHeight(context, 40),
+      //                 ),
+      //                 ),
+      //                 SizedBox(height: getHeight(context, 10)),
+      //                 Text(
+      //                   'Add Task',
+      //                   style: TextStyle(
+      //                     color: isDarkMode ? Colors.white : Colors.black,
+      //                     fontSize: getHeight(context, 18),
+      //                     fontWeight: FontWeight.bold,
+      //                   ),
+      //                 ),
+      //                 SizedBox(height: getHeight(context, 5)),
+      //                 Text(
+      //                   'Schedule your goals',
+      //                   style: TextStyle(
+      //                     color: isDarkMode
+      //                         ? Colors.white.withOpacity(0.7)
+      //                         : Colors.black.withOpacity(0.7),
+      //                     fontSize: getHeight(context, 14),
+      //                   ),
+      //                 ),
+      //               ],
+      //             ),
+      //           ),
 
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: getWidth(context, 20),
-                      vertical: getHeight(context, 10)),
-                  child: ListingWidget(
-                    heigthConstrain: 300,
-                    cardType: CardType.task,
-                    headerPresent: false,
-                    titlePresent: true,
-                    title: 'Upcoming Tasks',
-                    categories: ['All', 'Pending', 'Resolved'],
-                    selectedCategory: 'Pending',
-                    onCategorySelected: (category) {
-                    // Handle category selection
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+      //           Padding(
+      //             padding: EdgeInsets.symmetric(
+      //                 horizontal: getWidth(context, 20),
+      //                 vertical: getHeight(context, 10)),
+      //             child: ListingWidget(
+      //               heigthConstrain: 300,
+      //               cardType: CardType.task,
+      //               headerPresent: false,
+      //               titlePresent: true,
+      //               title: 'Upcoming Tasks',
+      //               categories: ['All', 'Pending', 'Resolved'],
+      //               selectedCategory: 'Pending',
+      //               onCategorySelected: (category) {
+      //               // Handle category selection
+      //               },
+      //             ),
+      //           ),
+      //         ],
+      //       ),
+      //     ],
+      //   ),
+      // ),
     );
   }
 
