@@ -89,10 +89,13 @@ class TaskProvider with ChangeNotifier {
 
   List<Task> getWeekData(){
     DateTime now = DateTime.now();
-    DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-    DateTime endOfWeek = now.add(Duration(days: DateTime.daysPerWeek - now.weekday));
-    
-    return _tasks.where((task) => task.date.isAfter(startOfWeek) && task.date.isBefore(endOfWeek)).toList();
+    DateTime startOfWeek = DateTime(now.year, now.month, now.day).subtract(Duration(days: now.weekday - 1));
+    DateTime endOfWeek = DateTime(now.year, now.month, now.day).add(Duration(days: DateTime.daysPerWeek - now.weekday));
+    print("llll");
+    print(_tasks.length);
+    print(startOfWeek);
+    print(_tasks[4].date);
+    return _tasks.where((task) => (task.date.isAfter(startOfWeek) || task.date.isAtSameMomentAs(startOfWeek)) && (task.date.isBefore(endOfWeek) || task.date.isAtSameMomentAs(endOfWeek))).toList();
   }
 
   void addTask(Task task) {

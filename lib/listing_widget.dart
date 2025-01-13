@@ -343,7 +343,7 @@ class _ListingWidgetState extends State<ListingWidget> {
                               ),
                             ),
                             Text(
-                              '${task.date.hour}:${task.date.minute} - ${task.date.day}/${task.date.month}/${task.date.year}',
+                              '${task.date.day}/${task.date.month}/${task.date.year}',
                               style: TextStyle(
                                 color: isnotChecked && !themeProvider.isDarkMode ? Colors.black : Colors.white,
                                 fontSize: getHeight(context, 12),
