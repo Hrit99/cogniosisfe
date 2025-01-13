@@ -32,6 +32,10 @@ class TaskProvider with ChangeNotifier {
   final List<Task> _tasks = [];
 
   Future<void> loadTasks() async {
+    if (_tasks.isNotEmpty) {
+      return;
+    }
+
     final url = Uri.parse('https://cogniosisbe-1366da2257bb.herokuapp.com/tasks');
     String accessToken = "";
     final prefs = await SharedPreferences.getInstance();
@@ -68,7 +72,7 @@ class TaskProvider with ChangeNotifier {
       }).toList();
       print(loadedTasks);
       setTasks(loadedTasks);
-      return ;
+      return;
     } else {
       throw Exception('Failed to load tasks');
     }
