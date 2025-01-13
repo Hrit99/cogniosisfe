@@ -45,6 +45,8 @@ class TaskProvider with ChangeNotifier {
     if (response.statusCode == 200) {
       final List<dynamic> taskList = jsonDecode(response.body);
       final List<Task> loadedTasks = taskList.map((taskData) {
+        print('taskData: ' + taskData['date']);
+        print('taskData type: ' + taskData['date'].runtimeType.toString());
         return Task(
           id: taskData['id'],
           title: taskData['title'],
@@ -53,7 +55,7 @@ class TaskProvider with ChangeNotifier {
             minutes: int.parse(taskData['duration'].split(':')[1]),
             seconds: int.parse(taskData['duration'].split(':')[2]),
           ),
-          date: DateTime.parse(taskData['date']),
+          date: DateTime.parse(taskData['date'].split('T')[0]),
           image: taskData['image'],
           isCompleted: taskData['is_completed'],
           durationCompleted: Duration(
