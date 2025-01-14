@@ -17,53 +17,57 @@ class VideoContent {
   final String image;
   final List<Video> videos;
   final String description;
- bool isFavourite; 
-
+  bool isFavourite;
 
   VideoContent({
     required this.title,
     required this.author,
     required this.image,
     required this.videos,
-      required this.isFavourite,
+    required this.isFavourite,
     required this.description,
   });
 }
 
+
+
 class VideoProvider with ChangeNotifier {
   final List<VideoContent> _videos = [
     VideoContent(
-      title: 'Meditation Session',
-      author: 'Jane Doe',
-      image: 'assets/nebula.jpeg',
-      videos: [
-        Video(duration: Duration(minutes: 20), url: 'https://example.com/video1.mp4'),
-        Video(duration: Duration(minutes: 30), url: 'https://example.com/video2.mp4'),
-      ],
+      title: 'Ethereal Awakening',
+      author: 'Christopher Lloyd-Clarke',
+      image: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/meditation_images/Calm+Relax+Ethereal+Awakening.png',
       isFavourite: false,
-      description: 'This is a meditation session',
+      videos: [
+        Video(duration: Duration(minutes: 4, seconds: 20), url: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Ethereal-Awakening.mp4'),
+        Video(duration: Duration(minutes: 4, seconds: 20), url: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Ethereal-Awakening.mp4'),
+        Video(duration: Duration(minutes: 4, seconds: 20), url: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Ethereal-Awakening.mp4'),
+        Video(duration: Duration(minutes: 4, seconds: 20), url: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Ethereal-Awakening.mp4'),
+        Video(duration: Duration(minutes: 4, seconds: 20), url: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Ethereal-Awakening.mp4'),
+      ],
+      description: 'This is a relaxation session',
     ),
     VideoContent(
-      title: 'Yoga for Beginners',
-      author: 'John Smith',
-      image: 'assets/nebula.jpeg',
-      videos: [
-        Video(duration: Duration(minutes: 15), url: 'https://example.com/video3.mp4'),
-        Video(duration: Duration(minutes: 25), url: 'https://example.com/video4.mp4'),
-      ],
+      title: 'Into The Light',
+      author: 'Christopher Lloyd-Clarke',
+      image: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/meditation_images/Calm+Relax+-+into+the+light.png',
       isFavourite: false,
-      description: 'This is a yoga session',
+      videos: [
+        Video(duration: Duration(hours: 1, minutes: 3), url: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Into+The+Light+-+Delta.mp4'),
+        Video(duration: Duration(hours: 1, minutes: 3), url: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Into+The+Light+-+Quiet+Seas+Edition+-+Delta.mp4'),
+      ],
+      description: 'This is a relaxation session',
     ),
+
     VideoContent(
-      title: 'Advanced Yoga',
-      author: 'Emily Johnson',
-      image: 'assets/nebula.jpeg',
-      videos: [
-        Video(duration: Duration(minutes: 40), url: 'https://example.com/video5.mp4'),
-        Video(duration: Duration(minutes: 50), url: 'https://example.com/video6.mp4'),
-      ],
+      title: 'Letting Go',
+      author: 'Christopher Lloyd-Clarke',
+      image: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/meditation_images/Calm+relax+-+Letting+go.png',
       isFavourite: false,
-      description: 'This is an advanced yoga session',
+      videos: [
+        Video(duration: Duration(hours: 1, minutes: 2, seconds: 20), url: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Letting+Go+(Delta).mp4'),
+      ],
+      description: 'This is a relaxation session',
     ),
     // Add more video content as needed
   ];
@@ -74,17 +78,20 @@ class VideoProvider with ChangeNotifier {
   }
 
   List<MediaItem> getVideos() {
-    return _videos.map((videoContent) => MediaItem(
-      image: videoContent.image,
-      title: videoContent.title,
-      duration: '${videoContent.videos.first.duration.inHours}h ${videoContent.videos.first.duration.inMinutes.remainder(60)}m',
-      author: videoContent.author,
-      description: videoContent.description,
-      isFavourite: videoContent.isFavourite,
-      mediaUrls: videoContent.videos.map((video) => video.url).toList(),
-      onFavouritePressed: (mediaItem) {
-        toggleFavourite(videoContent);
-      },
-    )).toList();
+    return _videos
+        .map((videoContent) => MediaItem(
+              image: videoContent.image,
+              title: videoContent.title,
+              duration:
+                  '${videoContent.videos.first.duration.inHours}h ${videoContent.videos.first.duration.inMinutes.remainder(60)}m',
+              author: videoContent.author,
+              description: videoContent.description,
+              isFavourite: videoContent.isFavourite,
+              mediaUrls: videoContent.videos.map((video) => video.url).toList(),
+              onFavouritePressed: (mediaItem) {
+                toggleFavourite(videoContent);
+              },
+            ))
+        .toList();
   }
 }

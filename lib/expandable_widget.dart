@@ -118,7 +118,7 @@ class _ExpandableButtonRowState extends State<ExpandableButtonRow> {
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             padding: EdgeInsets.symmetric(
-                horizontal: getWidth(context, 20),
+                horizontal: getWidth(context, 16),
                 vertical: getHeight(context, 16)),
             backgroundColor: isDarkMode ? Colors.grey[800] : Colors.white,
             foregroundColor: isDarkMode ? Colors.white : Colors.black,

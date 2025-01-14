@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cogniosis/screens/profile_screen.dart';
 
 class ThemeProvider with ChangeNotifier {
-  bool _isDarkMode = false;
+  bool _isDarkMode = true;
 
   bool get isDarkMode => _isDarkMode;
 
@@ -274,7 +274,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             headerPresent: true,
                             titlePresent: true,
                             title: 'Meditation',
-                            categories: ['Music', 'Videos', 'Exercises'],
+                            categories: ['Meditation', 'Relax', 'Sleep'],
                             onCategorySelected: (category) {
                               // Handle category selection
 

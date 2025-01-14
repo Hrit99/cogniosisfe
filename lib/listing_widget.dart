@@ -382,9 +382,9 @@ class _ListingWidgetState extends State<ListingWidget> {
   }
 
   Widget _buildMediaCardTypeOne(ThemeProvider themeProvider, MusicProvider musicProvider, VideoProvider videoProvider, ExerciseProvider exerciseProvider) {
-    final List<MediaItem> mediaItems = selectedCategory == 'Music'
+    final List<MediaItem> mediaItems = selectedCategory == 'Meditation'
         ? (musicProvider.getMusic() as List<MediaItem>)
-        : selectedCategory == 'Videos'
+        : selectedCategory == 'Relax'
             ? (videoProvider.getVideos() as List<MediaItem>)
             : (exerciseProvider.getExercises() as List<MediaItem>);
 
@@ -489,7 +489,7 @@ class _ListingWidgetState extends State<ListingWidget> {
   }
 
   Widget _buildMediaCardTypeTwo(ThemeProvider themeProvider, MusicProvider musicProvider, VideoProvider videoProvider, selectedCategory) {
-    final List<MediaItem> mediaItems =  selectedCategory == 'Music' ? musicProvider.getMusic() as List<MediaItem> : videoProvider.getVideos() as List<MediaItem>;
+    final List<MediaItem> mediaItems =  selectedCategory == 'Meditation' ? musicProvider.getMusic() as List<MediaItem> : videoProvider.getVideos() as List<MediaItem>;
 
     return ConstrainedBox(
       constraints: BoxConstraints(
@@ -546,13 +546,17 @@ class _ListingWidgetState extends State<ListingWidget> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            Text(
-                              mediaItem.author,
-                              style: TextStyle(
-                                color: themeProvider.isDarkMode ? Colors.white : Color(0xFF828282),
-                                fontSize: getHeight(context, 14),
-                                fontFamily: 'Satoshi',
-                                fontWeight: FontWeight.w500,
+                            Container(
+                              width: getWidth(context, 130),
+                              child: Text(
+                                mediaItem.author,
+                                style: TextStyle(
+                                  color: themeProvider.isDarkMode ? Colors.white : Color(0xFF828282),
+                                  fontSize: getHeight(context, 14),
+                                  fontFamily: 'Satoshi',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
@@ -639,13 +643,18 @@ class _ListingWidgetState extends State<ListingWidget> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              Container(
+                                width: getWidth(context, 130), // Adjust the width as needed
+                                child: Text(
                                   mediaItem.title,
-                                style: TextStyle(
-                                  color: themeProvider.isDarkMode ? Colors.white : Colors.black,
-                                  fontSize: getHeight(context, 18),
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Satoshi',
+                                  style: TextStyle(
+                                    color: themeProvider.isDarkMode ? Colors.white : Colors.black,
+                                    fontSize: getHeight(context, 18),
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'Satoshi',
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
                                 ),
                               ),
                               SizedBox(height: getHeight(context, 5)),

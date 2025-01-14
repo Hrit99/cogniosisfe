@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cogniosis/media_item_screen.dart';
 import 'package:cogniosis/media_slider.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +22,28 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
   int currentTrackIndex = 0;
   final musicWaveKey = GlobalKey<MusicWaveWithAudioState>();
   final titleKey = GlobalKey<_MediaplayertitleState>();
+  Duration currentPosition = Duration.zero;
+  Timer? timer;
+
+  @override
+  void initState() {
+    super.initState();
+    startTimer();
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  void startTimer() {
+    timer = Timer.periodic(Duration(seconds: 1), (Timer t) {
+      setState(() {
+        currentPosition += Duration(seconds: 1);
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,17 +116,19 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
                         Text(
                           '${widget.mediaItem.duration} . ${widget.mediaItem.mediaUrls.length} tracks',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: themeProvider.isDarkMode ? Colors.white : Colors.black,
                             fontSize: getHeight(context, 16),
                             fontFamily: 'Satoshi',
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
                           widget.mediaItem.author,
                           style: TextStyle(
-                            color: Colors.white,
+                            color: themeProvider.isDarkMode ? Colors.white : Colors.black,
                             fontSize: getHeight(context, 16),
                             fontFamily: 'Satoshi',
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         SizedBox(height: getHeight(context, 8)),
@@ -140,9 +166,9 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                '0:00',
+                                formatDuration(currentPosition),
                                 style: TextStyle(
-                                  color: Color(0xFF828282),
+                                  color: themeProvider.isDarkMode ? Colors.white : Colors.black,
                                   fontSize: getHeight(context, 12),
                                   fontFamily: 'Satoshi',
                                 ),
@@ -150,7 +176,7 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
                               Text(
                                 widget.mediaItem.duration,
                                 style: TextStyle(
-                                  color: Color(0xFF828282),
+                                  color: themeProvider.isDarkMode ? Colors.white : Colors.black,
                                   fontSize: getHeight(context, 12),
                                   fontFamily: 'Satoshi',
                                 ),
@@ -232,6 +258,14 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
         ],
       ),
     );
+  }
+
+  String formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final hours = twoDigits(duration.inHours);
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$hours:$minutes:$seconds';
   }
 }
 

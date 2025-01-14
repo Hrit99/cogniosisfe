@@ -16,7 +16,7 @@ class MeditationScreen extends StatefulWidget {
 }
 
 class _MeditationScreenState extends State<MeditationScreen> {
-  String selectedCategory = 'Music'; // Default category
+  String selectedCategory = 'Meditation'; // Default category
 
   @override
   Widget build(BuildContext context) {
@@ -99,50 +99,50 @@ class _MeditationScreenState extends State<MeditationScreen> {
                 SizedBox(height: getHeight(context, 10)),
                 _buildCategoryNav(),
                 SizedBox(height: getHeight(context, 10)),
-                (selectedCategory == 'Music') ? ListingWidget(
+                (selectedCategory == 'Meditation') ? ListingWidget(
                   titlePresent: true,
                   title: 'Recommended Audios',
                   cardType: CardType.media,
                   mediaCardType: MediaCardType.two,
                   headerPresent: false,
-                  categories: ['Music', 'Videos', 'Exercises', 'Favourites'],
+                  categories: ['Meditation', 'Relax', 'Sleep', 'Favourites'],
                   onCategorySelected: (category) {
                   },
                   ):SizedBox(),
                 // Add your screen content here
-                (selectedCategory == 'Music') ? ListingWidget(
+                  (selectedCategory == 'Meditation') ? ListingWidget(
                   titlePresent: true,
                   title: 'Top Trending Audios',
                   cardType: CardType.media,
                   mediaCardType: MediaCardType.three,
                   headerPresent: false,
-                  categories: ['Videos', 'Exercises', 'Favourites'],
+                  categories: ['Meditation', 'Relax', 'Sleep', 'Favourites'],
                   onCategorySelected: (category) {
                   },
                 ):SizedBox(),
-                selectedCategory == 'Videos' ? ListingWidget(
+                selectedCategory == 'Relax' ? ListingWidget(
                   titlePresent: true,
                   title: 'Recommended Videos',
                   cardType: CardType.media,
                   mediaCardType: MediaCardType.two,
-                  headerPresent: false,
+                  headerPresent: false, 
                   selectedCategory: selectedCategory,
-                  categories: ['Music', 'Exercises', 'Favourites'],
+                  categories: ['Relax', 'Sleep', 'Favourites'],
                   onCategorySelected: (category) {
                   },
                 ):SizedBox(),
-                selectedCategory == 'Videos' ? ListingWidget(
+                  selectedCategory == 'Relax' ? ListingWidget(
                   titlePresent: true,
                   title: 'Top Trending Videos',
                   cardType: CardType.media,
                   mediaCardType: MediaCardType.one,
                   headerPresent: false,
                   selectedCategory: selectedCategory,
-                  categories: ['Music', 'Videos', 'Favourites'],
+                  categories: ['Meditation', 'Relax', 'Favourites'],
                   onCategorySelected: (category) {
                   },
                 ):SizedBox(),
-                selectedCategory == 'Exercises' ? ListingWidget(
+                  selectedCategory == 'Sleep' ? ListingWidget(
                   titlePresent: true,
                   title: 'Recommended Exercises',
                   cardType: CardType.media,
@@ -178,11 +178,11 @@ class _MeditationScreenState extends State<MeditationScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children:
-            ["Music", "Videos", "Exercises", "Favourites"].map((category) {
+            ["Meditation", "Relax", "Sleep", "Favourites"].map((category) {
           bool isSelected = selectedCategory == category;
           return Container(
             height: getHeight(context, 40),
-            width: (MediaQuery.of(context).size.width / 1.1) /
+            width: (MediaQuery.of(context).size.width / 1.05) /
                 4, // Assuming 4 categories
             padding: EdgeInsets.symmetric(horizontal: getWidth(context, 0.5)),
             margin: EdgeInsets.symmetric(horizontal: getWidth(context, 0.5)),

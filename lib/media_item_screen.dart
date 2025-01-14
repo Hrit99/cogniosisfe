@@ -4,6 +4,9 @@ import 'package:cogniosis/media_player_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cogniosis/home_screen.dart';
+import 'package:dio/dio.dart'; // Add this import statement
+import 'package:share_plus/share_plus.dart'; // Add this import statement
+
 
 class MediaItemScreen extends StatelessWidget {
   final MediaItem mediaItem;
@@ -28,7 +31,7 @@ class MediaItemScreen extends StatelessWidget {
                     height: getHeight(context, 261),
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                        image: AssetImage(mediaItem.image),
+                        image: NetworkImage(mediaItem.image),
                         fit: BoxFit.cover,
               
                       ),
@@ -40,7 +43,7 @@ class MediaItemScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '${mediaItem.duration} • 2 audios',
+                        '${mediaItem.duration} • ${mediaItem.mediaUrls.length} audios',
                         style: TextStyle(
                           color: Colors.grey.shade700,
                           fontSize: getHeight(context, 12),
@@ -120,7 +123,7 @@ class MediaItemScreen extends StatelessWidget {
                  Padding(
                   padding: EdgeInsets.symmetric(horizontal: getWidth(context, 20), vertical: getHeight(context, 0)),
                   child: Text(
-                  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+                  mediaItem.description,
                   style: TextStyle(
                     color: themeProvider.isDarkMode ? Color(0xFFE0E0E0) : Colors.black,
                     fontSize: getHeight(context, 16),
@@ -190,13 +193,19 @@ class MediaItemScreen extends StatelessWidget {
               ),
             ),
               Positioned(
-              top: getHeight(context, 40),
+              top: getHeight(context, 35),
               left: getWidth(context, 10),
-              child: IconButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: Icon(Icons.arrow_back, color: themeProvider.isDarkMode ? Colors.white : Colors.white,),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: themeProvider.isDarkMode ? Colors.black.withOpacity(0.5)  : Color(0xFFE0E0E0).withOpacity(0.5), // Background color
+                  shape: BoxShape.circle, // Make it circular
+                ),
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: Icon(Icons.arrow_back, color: themeProvider.isDarkMode ? Colors.white : Colors.black,),
+                ),
               ),
             ),
           ],
@@ -266,8 +275,29 @@ class _IconRowState extends State<IconRow> {
             child: IconButton(
               icon:  Icon( Icons.cloud_download_outlined),
               color: widget.themeProvider.isDarkMode ? Colors.white : Colors.black,
-              onPressed: () {
-
+              onPressed: () async {
+                for (String url in widget.mediaItem.mediaUrls) {
+                  // Implement the download functionality here
+                  // For example, using the `dio` package to download the file
+                  try {
+                    var dio = Dio();
+                    var response = await dio.download(url, '${url.split('/').last}');
+                    if (response.statusCode == 200) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Download completed: ${url.split('/').last}')),
+                      );
+                    } else {
+                      // print('Failed to download: ${url.split('/').last}');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Failed to download: ${url.split('/').last}')),
+                      );
+                    }
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: $e')),
+                    );
+                  }
+                }
               },
               iconSize: getHeight(context, 20),
             ),
@@ -284,8 +314,13 @@ class _IconRowState extends State<IconRow> {
             child: IconButton(
               icon:  Icon( Icons.share),
               color: widget.themeProvider.isDarkMode ? Colors.white : Colors.black,
-              onPressed: () {
-
+              onPressed: () async {
+                List<String> urls = widget.mediaItem.mediaUrls;
+                String urlsString = urls.join('\n');
+                await Share.share(
+                  'Check out these audios:\n$urlsString',
+                  subject: 'Audio Files',
+                );
               },
               iconSize: getHeight(context, 20),
             ),

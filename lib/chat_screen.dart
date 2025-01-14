@@ -1,7 +1,6 @@
 import 'package:cogniosis/configmanager.dart';
 import 'package:cogniosis/dimensions.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'evi_message.dart' as evi;
 
@@ -19,7 +18,7 @@ class _ChatPageState extends State<ChatPage> {
   List<Message> _messages = [];
 
 
-   bool _isConnected = false;
+   
    WebSocketChannel? _chatChannel;
 
   @override
@@ -43,10 +42,7 @@ class _ChatPageState extends State<ChatPage> {
           "ConfigManager.instance.humeApiKey: ${ConfigManager.instance.humeApiKey}");
       print(
           "ConfigManager.instance.humeConfigId: ${ConfigManager.instance.humeConfigId}");
-      setState(() {
-        // _stopTune();
-        _isConnected = true;
-      });
+ 
       // if (ConfigManager.instance.humeApiKey.isNotEmpty &&
       //     ConfigManager.instance.humeAccessToken.isNotEmpty) {
       //   throw Exception(
@@ -76,41 +72,24 @@ class _ChatPageState extends State<ChatPage> {
         // _messages.add(Message(text: message.toString(), isUser: false));
         // This message contains audio data for playback.
         switch (message) {
-          case (evi.ErrorMessage errorMessage):
-            debugPrint("Error: ${errorMessage.message}");
-            break;
-          case (evi.ChatMetadataMessage chatMetadataMessage):
-            debugPrint("Chat metadata: ${chatMetadataMessage.rawJson}");
-            break;
-          case (evi.AudioOutputMessage audioOutputMessage):
-            break;
-          case (evi.UserInterruptionMessage _):
-           
-            break;
-          // These messages contain the transcript text of the user's or the assistant's speech
-          // as well as emotional analysis of the speech.
           case (evi.AssistantMessage assistantMessage):
           print("Assistant message: ${assistantMessage.message.content}");
            setState(() {
              _messages.add(Message(text: assistantMessage.message.content, isUser: false));
            });
             break;
-          case (evi.UserMessage userMessage):
-          print("User message: ${userMessage.message.content}");
-            
-            break;
-          case (evi.UnknownMessage unknownMessage):
-            debugPrint("Unknown message: ${unknownMessage.rawJson}");
+          default:
+            debugPrint("Unknown message: ${message.rawJson}");
             break;
         }
       },
       onError: (error) {
         debugPrint("Connection error: $error");
-        _handleConnectionClosed();
+       
       },
       onDone: () {
         debugPrint("Connection closed");
-        _handleConnectionClosed();
+
       },
     );
 
@@ -122,7 +101,6 @@ class _ChatPageState extends State<ChatPage> {
 
   void _disconnect() {
     try {
-      _handleConnectionClosed();
 
       _chatChannel?.sink.close();
 
@@ -133,11 +111,7 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-    void _handleConnectionClosed() {
-    setState(() {
-      _isConnected = false;
-    });
-  }
+
 
 
   
