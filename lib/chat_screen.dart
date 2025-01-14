@@ -3,6 +3,9 @@ import 'package:cogniosis/dimensions.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'evi_message.dart' as evi;
+
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 class ChatPage extends StatefulWidget {
   final bool isDarkMode;
@@ -14,9 +17,130 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
   List<Message> _messages = [];
-  final String _apiKey = ConfigManager.instance.openaiApiKey; // Access API key from .env file
-  final String _apiUrl = "https://api.openai.com/v1/chat/completions";
 
+
+   bool _isConnected = false;
+   WebSocketChannel? _chatChannel;
+
+  @override
+  void initState() {
+    super.initState();
+       // Automatically connect when the screen renders
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _connect();
+    });
+  }
+
+
+  
+  // Opens a websocket connection to the EVI API and registers a listener to handle
+  // incoming messages.
+  void _connect() {
+    try {
+      print(
+          "ConfigManager.instance.humeAccessToken: ${ConfigManager.instance.humeAccessToken}");
+      print(
+          "ConfigManager.instance.humeApiKey: ${ConfigManager.instance.humeApiKey}");
+      print(
+          "ConfigManager.instance.humeConfigId: ${ConfigManager.instance.humeConfigId}");
+      setState(() {
+        // _stopTune();
+        _isConnected = true;
+      });
+      // if (ConfigManager.instance.humeApiKey.isNotEmpty &&
+      //     ConfigManager.instance.humeAccessToken.isNotEmpty) {
+      //   throw Exception(
+      //       'Please use either an API key or an access token, not both');
+      // }
+
+      var uri = 'wss://api.hume.ai/v0/evi/chat';
+      if (ConfigManager.instance.humeAccessToken.isNotEmpty) {
+        uri +=
+            '?access_token=${ConfigManager.instance.humeAccessToken}&config_id=${ConfigManager.instance.humeConfigId}';
+      } else if (ConfigManager.instance.humeApiKey.isNotEmpty) {
+        print(
+            "ConfigManager.instance.humeApiKey: ${ConfigManager.instance.humeApiKey}");
+        uri += '?api_key=${ConfigManager.instance.humeApiKey}';
+      } else {
+        throw Exception('Please set your Hume API credentials in main.dart');
+      }
+
+      _chatChannel = WebSocketChannel.connect(Uri.parse(uri));
+
+      print("uri: $uri");
+
+     _chatChannel!.stream.listen(
+      (event) async {
+        final message = evi.EviMessage.decode(event);
+        debugPrint("Received message: ${message.type}");
+        // _messages.add(Message(text: message.toString(), isUser: false));
+        // This message contains audio data for playback.
+        switch (message) {
+          case (evi.ErrorMessage errorMessage):
+            debugPrint("Error: ${errorMessage.message}");
+            break;
+          case (evi.ChatMetadataMessage chatMetadataMessage):
+            debugPrint("Chat metadata: ${chatMetadataMessage.rawJson}");
+            break;
+          case (evi.AudioOutputMessage audioOutputMessage):
+            break;
+          case (evi.UserInterruptionMessage _):
+           
+            break;
+          // These messages contain the transcript text of the user's or the assistant's speech
+          // as well as emotional analysis of the speech.
+          case (evi.AssistantMessage assistantMessage):
+          print("Assistant message: ${assistantMessage.message.content}");
+           setState(() {
+             _messages.add(Message(text: assistantMessage.message.content, isUser: false));
+           });
+            break;
+          case (evi.UserMessage userMessage):
+          print("User message: ${userMessage.message.content}");
+            
+            break;
+          case (evi.UnknownMessage unknownMessage):
+            debugPrint("Unknown message: ${unknownMessage.rawJson}");
+            break;
+        }
+      },
+      onError: (error) {
+        debugPrint("Connection error: $error");
+        _handleConnectionClosed();
+      },
+      onDone: () {
+        debugPrint("Connection closed");
+        _handleConnectionClosed();
+      },
+    );
+
+      debugPrint("Connected");
+    } catch (e) {
+      debugPrint("Error connecting: $e");
+    }
+  }
+
+  void _disconnect() {
+    try {
+      _handleConnectionClosed();
+
+      _chatChannel?.sink.close();
+
+      debugPrint("Disconnected");
+      Navigator.pop(context);
+    } catch (e) {
+      debugPrint("Error disconnecting: $e");
+    }
+  }
+
+    void _handleConnectionClosed() {
+    setState(() {
+      _isConnected = false;
+    });
+  }
+
+
+  
   Future<void> _sendMessage() async {
     final text = _messageController.text;
     if (text.isNotEmpty) {
@@ -26,34 +150,40 @@ class _ChatPageState extends State<ChatPage> {
       _messageController.clear();
 
       try {
-        final response = await http.post(
-          Uri.parse(_apiUrl),
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer $_apiKey",
-          },
-          body: jsonEncode({
-            "model": "gpt-3.5-turbo", // Use "gpt-4" if available
-            "messages": [
-              {"role": "user", "content": text}
-            ]
-          }),
-        );
-        print("response: ${response.body}");
-        if (response.statusCode == 200) {
-          print("response: ${response.body}");
-          final jsonResponse = jsonDecode(response.body);
-          final botReply = jsonResponse['choices'][0]['message']['content'] ?? "No response";
+        // final response = await http.post(
+        //   Uri.parse(_apiUrl),
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //     "Authorization": "Bearer $_apiKey",
+        //   },
+        //   body: jsonEncode({
+        //     "model": "gpt-3.5-turbo", // Use "gpt-4" if available
+        //     "messages": [
+        //       {"role": "user", "content": text}
+        //     ]
+        //   }),
+        // );
+        // print("response: ${response.body}");
+        // if (response.statusCode == 200) {
+        //   print("response: ${response.body}");
+        //   final jsonResponse = jsonDecode(response.body);
+        //   final botReply = jsonResponse['choices'][0]['message']['content'] ?? "No response";
 
-          setState(() {
-            _messages.add(Message(text: botReply, isUser: false));
-          });
-        } else {
-          setState(() {
-            print("error: ${response.reasonPhrase}");
-            _messages.add(Message(text: "Errors: ${response.reasonPhrase}", isUser: false));
-          });
-        }
+        //   setState(() {
+        //     _messages.add(Message(text: botReply, isUser: false));
+        //   });
+        // } else {
+        //   setState(() {
+        //     print("error: ${response.reasonPhrase}");
+        //     _messages.add(Message(text: "Errors: ${response.reasonPhrase}", isUser: false));
+        //   });
+        // }
+
+           _chatChannel!.sink.add(jsonEncode({
+      'type': 'user_input',
+      'text': text,
+    }));
+        
       } catch (e) {
         setState(() {
           print("error: $e");
@@ -271,3 +401,8 @@ class ChatOptionCard extends StatelessWidget {
     );
   }
 }
+
+
+
+
+
