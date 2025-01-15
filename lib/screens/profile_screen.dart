@@ -81,7 +81,9 @@ class ProfileScreen extends StatelessWidget {
             context,
             icon: Icons.delete,
             text: 'Delete Account',
-            onTap: () {},
+            onTap: () {
+              _deleteAccount(context);
+            },
           ),
           SizedBox(height: 20),
           _buildLogoutButton(context),
@@ -216,5 +218,35 @@ class ProfileScreen extends StatelessWidget {
         SnackBar(content: Text('Failed to reset password: ${response.statusCode}')),
       );
     }
+  }
+
+  Future<void> _deleteAccount(BuildContext context) async {
+    final url = Uri.parse('/delete_account');
+    final response = await http.delete(
+      url,
+      headers: {'Authorization': 'Bearer ${await _getToken()}'},
+    );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Account deleted successfully')),
+      );
+      // Delete account from Google
+      final googleSignIn = GoogleSignIn();
+      await googleSignIn.signOut();
+      // Clear shared preferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      Navigator.push(context, MaterialPageRoute(builder: (context) => SplashScreen()));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete account: ${response.statusCode}')),
+      );
+    }
+  }
+
+  Future<String?> _getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('access_token');
   }
 }
