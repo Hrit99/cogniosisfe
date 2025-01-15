@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:cogniosis/home_screen.dart';
 import 'package:dio/dio.dart'; // Add this import statement
 import 'package:share_plus/share_plus.dart'; // Add this import statement
+import 'package:path_provider/path_provider.dart'; // Add this import statement
 
 
 class MediaItemScreen extends StatelessWidget {
@@ -184,6 +185,7 @@ class MediaItemScreen extends StatelessWidget {
                   cardType: CardType.media,
                   mediaCardType: MediaCardType.three,
                   headerPresent: false,
+                  authorFilter: mediaItem.author,
                   categories: ['Videos', 'Exercises', 'Favourites'],
                   onCategorySelected: (category) {
                   },
@@ -237,6 +239,36 @@ class _IconRowState extends State<IconRow> {
     super.initState();
   }
 
+  Future<void> downloadFile(String url) async {
+    try {
+      var dio = Dio();
+      var directory = await getApplicationDocumentsDirectory();
+      var savePath = '${directory.path}/${url.split('/').last}';
+
+      var response = await dio.download(url, savePath);
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Download completed: ${url.split('/').last}')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to download: ${url.split('/').last}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
+
+  void downloadAllFiles() async {
+    for (var url in widget.mediaItem.mediaUrls) {
+      await downloadFile(url);
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -275,30 +307,7 @@ class _IconRowState extends State<IconRow> {
             child: IconButton(
               icon:  Icon( Icons.cloud_download_outlined),
               color: widget.themeProvider.isDarkMode ? Colors.white : Colors.black,
-              onPressed: () async {
-                for (String url in widget.mediaItem.mediaUrls) {
-                  // Implement the download functionality here
-                  // For example, using the `dio` package to download the file
-                  try {
-                    var dio = Dio();
-                    var response = await dio.download(url, '${url.split('/').last}');
-                    if (response.statusCode == 200) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Download completed: ${url.split('/').last}')),
-                      );
-                    } else {
-                      // print('Failed to download: ${url.split('/').last}');
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Failed to download: ${url.split('/').last}')),
-                      );
-                    }
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $e')),
-                    );
-                  }
-                }
-              },
+              onPressed: downloadAllFiles,
               iconSize: getHeight(context, 20),
             ),
           ),

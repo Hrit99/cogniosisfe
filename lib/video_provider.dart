@@ -29,32 +29,53 @@ class VideoContent {
   });
 }
 
-
-
 class VideoProvider with ChangeNotifier {
   final List<VideoContent> _videos = [
     VideoContent(
       title: 'Ethereal Awakening',
       author: 'Christopher Lloyd-Clarke',
-      image: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/meditation_images/Calm+Relax+Ethereal+Awakening.png',
+      image:
+          'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/meditation_images/Calm+Relax+Ethereal+Awakening.png',
       isFavourite: false,
       videos: [
-        Video(duration: Duration(minutes: 4, seconds: 20), url: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Ethereal-Awakening.mp4'),
-        Video(duration: Duration(minutes: 4, seconds: 20), url: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Ethereal-Awakening.mp4'),
-        Video(duration: Duration(minutes: 4, seconds: 20), url: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Ethereal-Awakening.mp4'),
-        Video(duration: Duration(minutes: 4, seconds: 20), url: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Ethereal-Awakening.mp4'),
-        Video(duration: Duration(minutes: 4, seconds: 20), url: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Ethereal-Awakening.mp4'),
+        Video(
+            duration: Duration(minutes: 4, seconds: 20),
+            url:
+                'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Ethereal-Awakening.mp4'),
+        Video(
+            duration: Duration(minutes: 4, seconds: 20),
+            url:
+                'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Ethereal-Awakening.mp4'),
+        Video(
+            duration: Duration(minutes: 4, seconds: 20),
+            url:
+                'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Ethereal-Awakening.mp4'),
+        Video(
+            duration: Duration(minutes: 4, seconds: 20),
+            url:
+                'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Ethereal-Awakening.mp4'),
+        Video(
+            duration: Duration(minutes: 4, seconds: 20),
+            url:
+                'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Ethereal-Awakening.mp4'),
       ],
       description: 'This is a relaxation session',
     ),
     VideoContent(
       title: 'Into The Light',
       author: 'Christopher Lloyd-Clarke',
-      image: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/meditation_images/Calm+Relax+-+into+the+light.png',
+      image:
+          'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/meditation_images/Calm+Relax+-+into+the+light.png',
       isFavourite: false,
       videos: [
-        Video(duration: Duration(hours: 1, minutes: 3), url: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Into+The+Light+-+Delta.mp4'),
-        Video(duration: Duration(hours: 1, minutes: 3), url: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Into+The+Light+-+Quiet+Seas+Edition+-+Delta.mp4'),
+        Video(
+            duration: Duration(hours: 1, minutes: 3),
+            url:
+                'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Into+The+Light+-+Delta.mp4'),
+        Video(
+            duration: Duration(hours: 1, minutes: 3),
+            url:
+                'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Into+The+Light+-+Quiet+Seas+Edition+-+Delta.mp4'),
       ],
       description: 'This is a relaxation session',
     ),
@@ -62,13 +83,27 @@ class VideoProvider with ChangeNotifier {
     VideoContent(
       title: 'Letting Go',
       author: 'Christopher Lloyd-Clarke',
-      image: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/meditation_images/Calm+relax+-+Letting+go.png',
+      image:
+          'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/meditation_images/Calm+relax+-+Letting+go.png',
       isFavourite: false,
       videos: [
-        Video(duration: Duration(hours: 1, minutes: 2, seconds: 20), url: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Letting+Go+(Delta).mp4'),
+        Video(
+            duration: Duration(hours: 1, minutes: 2, seconds: 20),
+            url:
+                'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/mediation/Letting+Go+(Delta).mp4'),
       ],
       description: 'This is a relaxation session',
     ),
+    VideoContent(
+        title: 'The Temple gardens',
+        author: 'Christopher Lloyd-Clarke',
+        image:
+            'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/Calm+Relax+-+The+temple+gardens.png',
+        videos: [
+          Video(duration: Duration(hours: 1), url: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/The+Temple+Gardens+-+Volume+2+-+Delta.mp3'),
+        ],
+        isFavourite: false,
+        description: 'This is a relaxation session')
     // Add more video content as needed
   ];
 

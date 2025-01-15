@@ -41,7 +41,7 @@ class _ChatPageState extends State<ChatPage> {
       print(
           "ConfigManager.instance.humeApiKey: ${ConfigManager.instance.humeApiKey}");
       print(
-          "ConfigManager.instance.humeConfigId: ${ConfigManager.instance.humeConfigId}");
+          "ConfigManager.instance.humeConfigIdChat: ${ConfigManager.instance.humeConfigIdChat}");
  
       // if (ConfigManager.instance.humeApiKey.isNotEmpty &&
       //     ConfigManager.instance.humeAccessToken.isNotEmpty) {
@@ -52,7 +52,7 @@ class _ChatPageState extends State<ChatPage> {
       var uri = 'wss://api.hume.ai/v0/evi/chat';
       if (ConfigManager.instance.humeAccessToken.isNotEmpty) {
         uri +=
-            '?access_token=${ConfigManager.instance.humeAccessToken}&config_id=${ConfigManager.instance.humeConfigId}';
+            '?access_token=${ConfigManager.instance.humeAccessToken}&config_id=${ConfigManager.instance.humeConfigIdChat}';
       } else if (ConfigManager.instance.humeApiKey.isNotEmpty) {
         print(
             "ConfigManager.instance.humeApiKey: ${ConfigManager.instance.humeApiKey}");
@@ -68,6 +68,7 @@ class _ChatPageState extends State<ChatPage> {
      _chatChannel!.stream.listen(
       (event) async {
         final message = evi.EviMessage.decode(event);
+        print("message: $message");
         debugPrint("Received message: ${message.type}");
         // _messages.add(Message(text: message.toString(), isUser: false));
         // This message contains audio data for playback.
@@ -152,7 +153,7 @@ class _ChatPageState extends State<ChatPage> {
         //     _messages.add(Message(text: "Errors: ${response.reasonPhrase}", isUser: false));
         //   });
         // }
-
+      print("ConfigManager.instance.humeConfigIdChat: ${ConfigManager.instance.humeConfigIdChat}");
            _chatChannel!.sink.add(jsonEncode({
       'type': 'user_input',
       'text': text,

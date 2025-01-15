@@ -45,6 +45,7 @@ class ListingWidget extends StatefulWidget {
   final Function(String) onCategorySelected;
   final double? heigthConstrain;
   final String? selectedCategory;
+  final String? authorFilter;
 
   const ListingWidget({
     Key? key,
@@ -57,6 +58,7 @@ class ListingWidget extends StatefulWidget {
     required this.categories,
     required this.onCategorySelected,
     this.heigthConstrain = 250,
+    this.authorFilter,
   }) : assert(
           !titlePresent || (titlePresent && title != null),
           'Title must be provided when titlePresent is true',
@@ -603,7 +605,12 @@ class _ListingWidgetState extends State<ListingWidget> {
   }
 
   Widget _buildMediaCardTypeThree(ThemeProvider themeProvider, MusicProvider musicProvider) {
-    final List<MediaItem> mediaItems = musicProvider.getMusic() ;
+    List<MediaItem> mediaItems;
+    if(widget.authorFilter == null) {
+      mediaItems = musicProvider.getMusic() ;
+    } else {
+      mediaItems = musicProvider.getMusic().where((item) => item.author == widget.authorFilter).toList();
+    }
 
     return ConstrainedBox(
       constraints: BoxConstraints(

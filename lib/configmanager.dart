@@ -11,6 +11,7 @@ class ConfigManager {
   String humeSecretKey = "";
   String humeAccessToken = "";
   late final String humeConfigId;
+  late final String humeConfigIdChat;
   String openaiApiKey = "";
   ConfigManager._internal();
 
@@ -57,6 +58,7 @@ class ConfigManager {
       humeApiKey = keys['hume_api_key'];
       humeSecretKey = keys['hume_secret_key'];
       humeConfigId = keys['hume_config_id'];
+      humeConfigIdChat = keys['hume_config_id_chat'];
       openaiApiKey = keys['openai_key'];
     } else {
       throw Exception('Failed to load keys from server');
@@ -71,5 +73,5 @@ class ConfigManager {
 
     // Uncomment this to use an access token in production.
     humeAccessToken = await fetchAccessToken();
-  }
+}
 }

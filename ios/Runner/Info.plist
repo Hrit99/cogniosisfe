@@ -62,5 +62,7 @@
 	<array>
 	<string>google</string>
 	</array>
+	<key>NSDocumentsUsageDescription</key>
+	<string>We need access to save downloaded files.</string>
 </dict>
 </plist>
