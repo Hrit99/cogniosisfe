@@ -87,7 +87,7 @@ class HabitScreen extends StatelessWidget {
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: getWidth(context, 20), vertical: getHeight(context, 20)),
+                              padding: EdgeInsets.symmetric(horizontal: getWidth(context, 10), vertical: getHeight(context, 20)),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: habitProvider.getUniqueTimes().map((time) => Container(
@@ -118,7 +118,7 @@ class HabitScreen extends StatelessWidget {
                                                    return Container(
                                                      margin: EdgeInsets.symmetric(vertical: 5.0),
                                                      width: double.infinity,
-                                                     padding: EdgeInsets.symmetric(horizontal: getWidth(context, 0), vertical: getHeight(context, 10)),
+                                                     padding: EdgeInsets.symmetric( vertical: getHeight(context, 10)),
                                                      decoration: BoxDecoration(
                                                        color: isDarkMode ? Color(0xFF1D2122) : Colors.grey[200],
                                                        borderRadius: BorderRadius.circular(10),

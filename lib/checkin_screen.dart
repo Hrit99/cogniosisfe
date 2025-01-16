@@ -214,7 +214,7 @@ class CircularTrapeziums extends StatelessWidget {
               child: GestureDetector(
       onTap: () {
         print(moodDataList[index]['name']);
-        Provider.of<MoodProvider>(context, listen: false).setMood(DateTime.now().toIso8601String().split('T').first, moodDataList[index]['name']);
+        Provider.of<MoodProvider>(context, listen: false).setMood(DateTime.now().subtract(Duration(days: 0)).toIso8601String().split('T').first, moodDataList[index]['name']);
         Navigator.push(context, MaterialPageRoute(builder: (context) => CheckInSummaryScreen()));
       },
       child:Container(

@@ -1,14 +1,17 @@
 import 'package:cogniosis/dimensions.dart';
 import 'package:cogniosis/media_item_screen.dart';
 import 'package:cogniosis/media_player_screen.dart';
+import 'package:cogniosis/splash_screen.dart';
 import 'package:cogniosis/task_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:cogniosis/home_screen.dart';
 import 'package:cogniosis/task_provider.dart';
 import 'package:cogniosis/music_provider.dart';
 import 'package:cogniosis/video_provider.dart';
 import 'package:cogniosis/exercise_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum CardType { task, media }
 enum MediaCardType { one, two, three, four }
@@ -211,7 +214,13 @@ class _ListingWidgetState extends State<ListingWidget> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text('Error loading tasks'));
+                GoogleSignIn().signOut();
+                GoogleSignIn().disconnect();
+                SharedPreferences.getInstance().then((prefs) {
+                  prefs.remove('access_token');
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => SplashScreen()));
+                });
+            return Center(child: CircularProgressIndicator());
           } else {
             return _buildTaskCard(themeProvider, taskProvider);
           }
@@ -416,7 +425,13 @@ class _ListingWidgetState extends State<ListingWidget> {
                   },
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.network(mediaItem.image, height: getWidth(context, 187), width: MediaQuery.of(context).size.width, fit: BoxFit.cover,),
+                    child: Image.network(
+                      mediaItem.image,
+                      height: getWidth(context, 300),
+                      width: MediaQuery.of(context).size.width,
+                      fit: BoxFit.cover,
+                      alignment: Alignment.topCenter, // Crop upper part of image
+                    ),
                   ),
                 ),
                 SizedBox(height: getHeight(context, 10)),
@@ -440,6 +455,19 @@ class _ListingWidgetState extends State<ListingWidget> {
                             ),
                             Text(
                               mediaItem.author,
+                              style: TextStyle(
+                                color: themeProvider.isDarkMode ? Colors.white : Color(0xFF828282),
+                                fontSize: getHeight(context, 14),
+                                fontFamily: 'Satoshi',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              mediaItem.duration.split(' ')[0] == '0h'
+                                  ? '${mediaItem.duration.split(' ')[1].replaceAll('m', ' min')} '
+                                  : mediaItem.duration.split(' ')[1] == '0m'
+                                      ? '${mediaItem.duration.split(' ')[0].replaceAll('h', ' hr')} '
+                                      : mediaItem.duration,
                               style: TextStyle(
                                 color: themeProvider.isDarkMode ? Colors.white : Color(0xFF828282),
                                 fontSize: getHeight(context, 14),
@@ -561,6 +589,19 @@ class _ListingWidgetState extends State<ListingWidget> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
+                              Text(
+                              mediaItem.duration.split(' ')[0] == '0h'
+                                  ? '${mediaItem.duration.split(' ')[1].replaceAll('m', ' min')} '
+                                  : mediaItem.duration.split(' ')[1] == '0m'
+                                      ? '${mediaItem.duration.split(' ')[0].replaceAll('h', ' hr')} '
+                                      : mediaItem.duration,
+                              style: TextStyle(
+                                color: themeProvider.isDarkMode ? Colors.white : Color(0xFF828282),
+                                fontSize: getHeight(context, 14),
+                                fontFamily: 'Satoshi',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                           ],
                         ),
                        Container(
@@ -666,7 +707,11 @@ class _ListingWidgetState extends State<ListingWidget> {
                               ),
                               SizedBox(height: getHeight(context, 5)),
                               Text(
-                                mediaItem.duration,
+                                 mediaItem.duration.split(' ')[0] == '0h'
+                                  ? '${mediaItem.duration.split(' ')[1].replaceAll('m', ' min')} '
+                                  : mediaItem.duration.split(' ')[1] == '0m'
+                                      ? '${mediaItem.duration.split(' ')[0].replaceAll('h', ' hr')} '
+                                      : mediaItem.duration,
                                 style: TextStyle(
                                   color:  Color(0xFF828282),
                                   fontSize: getHeight(context, 12),

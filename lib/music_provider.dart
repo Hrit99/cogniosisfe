@@ -51,7 +51,7 @@ class MusicProvider with ChangeNotifier {
         title: 'Transcendental Meditation',
         author: 'Roisin',
         image:
-            'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/2.png',
+            'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/transcendental.png',
         melodies: [
           Melody(
               duration: Duration(minutes: 10),
@@ -156,7 +156,7 @@ class MusicProvider with ChangeNotifier {
         title: 'Endless Calm',
         author: 'Linda Hall',
         image:
-            'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/2.png',
+            'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/endlesscalm.png',
         melodies: [
           Melody(
               duration: Duration(minutes: 23),
@@ -182,7 +182,7 @@ class MusicProvider with ChangeNotifier {
         title: 'Dolphin Reconnection',
         author: 'Brad Austen',
         image:
-            'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/2.png',
+            'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/dolphin.png',
         melodies: [
           Melody(duration: Duration(minutes: 14), url: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/03+Dolphin+Reconnection+Meditation.mp3'),
         ],
@@ -202,7 +202,7 @@ class MusicProvider with ChangeNotifier {
         title: 'Relax At The Beach',
         author: 'Brad Austen',
         image:
-            'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/1.png',
+            'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/beach.png',
         melodies: [
           Melody(duration: Duration(minutes: 14), url: 'https://aizenstorage.s3.us-east-1.amazonaws.com/cogniosis/01+Message+In+A+Bottle+Meditation.mp3'),
         ],

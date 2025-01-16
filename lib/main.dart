@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async'; // Import the timer package
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cogniosis/configmanager.dart';
@@ -259,6 +260,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 : Image.asset("assets/logo.png",
                     height: getHeight(context, 300),
                     width: getWidth(context, 300)),
+          ),
+          Positioned(
+            top: getHeight(context, 300), // Adjust the position as needed
+            left: (MediaQuery.of(context).size.width - getWidth(context, 70))/2,
+            child: TimerWidget(isDarkMode: widget.isDarkMode), // Add the TimerWidget here
           ),
           Positioned(
             bottom: getHeight(context, 30),
@@ -606,3 +612,50 @@ class _MyHomePageState extends State<MyHomePage> {
 //     print("Failed to configure audio session: $e");
 //   }
 // }
+
+class TimerWidget extends StatefulWidget {
+  final bool isDarkMode;
+  const TimerWidget({super.key, required this.isDarkMode});
+  @override
+  _TimerWidgetState createState() => _TimerWidgetState();
+}
+
+class _TimerWidgetState extends State<TimerWidget> {
+  late Timer _timer;
+  int _seconds = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        _seconds++;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  String _formatTime(int seconds) {
+    final hours = seconds ~/ 3600;
+    final minutes = (seconds % 3600) ~/ 60;
+    final remainingSeconds = seconds % 60;
+    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      _formatTime(_seconds),
+      style: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.normal,
+        color: widget.isDarkMode ? Colors.white : Colors.black,
+      ),
+    );
+  }
+}
