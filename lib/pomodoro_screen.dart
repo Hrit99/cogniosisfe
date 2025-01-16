@@ -211,38 +211,38 @@ class PomodoroScreen extends StatelessWidget {
           date: startOfWeek.add(Duration(days: 6)).toIso8601String().split('T')[0]),
     ];
 
-    for (var task in tasks) {
-      final day = task.date.weekday;
-      int completionPercentage = task.duration.inSeconds > 0
-          ? ((task.durationCompleted.inSeconds / task.duration.inSeconds) * 100)
-              .toInt()
-          : 0;
-      switch (day) {
-        case DateTime.monday:
-          weekData[0].completed += completionPercentage;
-          break;
-        case DateTime.tuesday:
-          weekData[1].completed += completionPercentage;
-          break;
-        case DateTime.wednesday:
-          weekData[2].completed += completionPercentage;
-          break;
-        case DateTime.thursday:
-          weekData[3].completed += completionPercentage;
-          break;
-        case DateTime.friday:
-          weekData[4].completed += completionPercentage;
-          break;
-        case DateTime.saturday:
-          weekData[5].completed += completionPercentage;
-          break;
-        case DateTime.sunday:
-          weekData[6].completed += completionPercentage;
-          break;
-        default:
-          break;
-      }
-    }
+    // for (var task in tasks) {
+    //   final day = task.date.weekday;
+    //   int completionPercentage = task.duration.inSeconds > 0
+    //       ? ((task.durationCompleted.inSeconds / task.duration.inSeconds) * 100)
+    //           .toInt()
+    //       : 0;
+    //   switch (day) {
+    //     case DateTime.monday:
+    //       weekData[0].completed += completionPercentage;
+    //       break;
+    //     case DateTime.tuesday:
+    //       weekData[1].completed += completionPercentage;
+    //       break;
+    //     case DateTime.wednesday:
+    //       weekData[2].completed += completionPercentage;
+    //       break;
+    //     case DateTime.thursday:
+    //       weekData[3].completed += completionPercentage;
+    //       break;
+    //     case DateTime.friday:
+    //       weekData[4].completed += completionPercentage;
+    //       break;
+    //     case DateTime.saturday:
+    //       weekData[5].completed += completionPercentage;
+    //       break;
+    //     case DateTime.sunday:
+    //       weekData[6].completed += completionPercentage;
+    //       break;
+    //     default:
+    //       break;
+    //   }
+    // }
 
     for (var data in weekData) {
       int taskCount = tasks

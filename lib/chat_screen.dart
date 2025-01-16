@@ -206,21 +206,21 @@ class _ChatPageState extends State<ChatPage> {
                     
                          ChatOptionCard(
                           isDarkMode: widget.isDarkMode,
-                          title: "Design a mobile application",
-                          subtitle: "Hac aliquet diam odio amet viverra elit commodo",
+                          title: "Talk to Someone Who Understands",
+                          subtitle: "Get personalized guidance to improve your well-being.",
                           onTap: () {
-                            _messageController.text = "Design a mobile application";
-                            _sendMessage();
+                            // _messageController.text = "Design a mobile application";
+                            // _sendMessage();
                           },
                       ),
                       SizedBox(height: 10),
                       ChatOptionCard(
                         isDarkMode: widget.isDarkMode,
-                        title: "Build a new AI project",
-                        subtitle: "Describe your ideas and requirements",
+                        title: "Build a Path to Better Mental Health",
+                        subtitle: "Share your concerns, and let’s work together to find solutions.",
                         onTap: () {
-                          _messageController.text = "Build a new AI project";
-                          _sendMessage();
+                          // _messageController.text = "Build a new AI project";
+                          // _sendMessage();
                         },
                       ),
                     ]
