@@ -98,7 +98,6 @@ class TaskProvider with ChangeNotifier {
     print("llll");
     print(_tasks.length);
     print(startOfWeek);
-    print(_tasks[4].date);
     return _tasks.where((task) => (task.date.isAfter(startOfWeek) || task.date.isAtSameMomentAs(startOfWeek)) && (task.date.isBefore(endOfWeek) || task.date.isAtSameMomentAs(endOfWeek))).toList();
   }
 

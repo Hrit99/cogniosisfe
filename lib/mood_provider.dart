@@ -29,8 +29,6 @@ class MoodProvider with ChangeNotifier {
   }
 
   Future<void> clearMoodData() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
     _moodData.clear();
     notifyListeners();
   }

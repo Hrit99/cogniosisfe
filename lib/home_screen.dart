@@ -62,7 +62,12 @@ class _HomeScreenState extends State<HomeScreen> {
       if (now.isAfter(parsedEndOfMonth) || now.isBefore(parsedStartOfMonth)) {
         // Clear all shared preferences except 'access_token'
         final accessToken = prefs.getString('access_token');
-        prefs.clear();
+        final keys = prefs.getKeys();
+        for (String key in keys) {
+          if (key.startsWith('mood_')) {
+            prefs.remove(key);
+          }
+        }
         if (accessToken != null) {
           prefs.setString('access_token', accessToken);
         }
