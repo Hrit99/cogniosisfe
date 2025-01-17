@@ -1,5 +1,6 @@
 import 'package:cogniosis/dimensions.dart';
 import 'package:cogniosis/intro_screen.dart';
+import 'package:cogniosis/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -63,7 +64,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   void _navigateToLogin(BuildContext context) {
     Navigator.pushReplacement(
       context,
-      _createFadeScaleRoute(IntroScreen1()),
+      _createFadeScaleRoute(LoginScreen()),
     );
   }
 

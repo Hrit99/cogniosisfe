@@ -15,23 +15,20 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   List<Message> _messages = [];
 
-
-   
-   WebSocketChannel? _chatChannel;
+  WebSocketChannel? _chatChannel;
 
   @override
   void initState() {
     super.initState();
-       // Automatically connect when the screen renders
+    // Automatically connect when the screen renders
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _connect();
     });
   }
 
-
-  
   // Opens a websocket connection to the EVI API and registers a listener to handle
   // incoming messages.
   void _connect() {
@@ -42,12 +39,6 @@ class _ChatPageState extends State<ChatPage> {
           "ConfigManager.instance.humeApiKey: ${ConfigManager.instance.humeApiKey}");
       print(
           "ConfigManager.instance.humeConfigIdChat: ${ConfigManager.instance.humeConfigIdChat}");
- 
-      // if (ConfigManager.instance.humeApiKey.isNotEmpty &&
-      //     ConfigManager.instance.humeAccessToken.isNotEmpty) {
-      //   throw Exception(
-      //       'Please use either an API key or an access token, not both');
-      // }
 
       var uri = 'wss://api.hume.ai/v0/evi/chat';
       if (ConfigManager.instance.humeAccessToken.isNotEmpty) {
@@ -65,46 +56,40 @@ class _ChatPageState extends State<ChatPage> {
 
       print("uri: $uri");
 
-     _chatChannel!.stream.listen(
-      (event) async {
-        final message = evi.EviMessage.decode(event);
-        print("message: $message");
-        debugPrint("Received message: ${message.type}");
-        // _messages.add(Message(text: message.toString(), isUser: false));
-        // This message contains audio data for playback.
-        switch (message) {
-          case (evi.AssistantMessage assistantMessage):
-          print("Assistant message: ${assistantMessage.message.content}");
-           setState(() {
-             _messages.add(Message(text: assistantMessage.message.content, isUser: false));
-           });
-            break;
-          default:
-            debugPrint("Unknown message: ${message.rawJson}");
-            break;
-        }
-      },
-      onError: (error) {
-        debugPrint("Connection error: $error");
-       
-      },
-      onDone: () {
-        debugPrint("Connection closed");
-
-      },
-    );
+      _chatChannel!.stream.listen(
+        (event) async {
+          final message = evi.EviMessage.decode(event);
+          debugPrint("Received message: ${message.type}");
+          switch (message) {
+            case (evi.AssistantMessage assistantMessage):
+              setState(() {
+                _messages.add(Message(text: assistantMessage.message.content, isUser: false));
+                _scrollToBottom();
+              });
+              break;
+            default:
+              break;
+          }
+        },
+        onError: (error) {
+          _connect();
+          debugPrint("Connection error: $error");
+        },
+        onDone: () {
+          debugPrint("Connection closed");
+        },
+      );
 
       debugPrint("Connected");
     } catch (e) {
+      _connect();
       debugPrint("Error connecting: $e");
     }
   }
 
   void _disconnect() {
     try {
-
       _chatChannel?.sink.close();
-
       debugPrint("Disconnected");
       Navigator.pop(context);
     } catch (e) {
@@ -112,65 +97,44 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-
-
-
-  
   Future<void> _sendMessage() async {
     final text = _messageController.text;
     if (text.isNotEmpty) {
       setState(() {
         _messages.add(Message(text: text, isUser: true));
+        _scrollToBottom();
       });
       _messageController.clear();
 
       try {
-        // final response = await http.post(
-        //   Uri.parse(_apiUrl),
-        //   headers: {
-        //     "Content-Type": "application/json",
-        //     "Authorization": "Bearer $_apiKey",
-        //   },
-        //   body: jsonEncode({
-        //     "model": "gpt-3.5-turbo", // Use "gpt-4" if available
-        //     "messages": [
-        //       {"role": "user", "content": text}
-        //     ]
-        //   }),
-        // );
-        // print("response: ${response.body}");
-        // if (response.statusCode == 200) {
-        //   print("response: ${response.body}");
-        //   final jsonResponse = jsonDecode(response.body);
-        //   final botReply = jsonResponse['choices'][0]['message']['content'] ?? "No response";
-
-        //   setState(() {
-        //     _messages.add(Message(text: botReply, isUser: false));
-        //   });
-        // } else {
-        //   setState(() {
-        //     print("error: ${response.reasonPhrase}");
-        //     _messages.add(Message(text: "Errors: ${response.reasonPhrase}", isUser: false));
-        //   });
-        // }
-      print("ConfigManager.instance.humeConfigIdChat: ${ConfigManager.instance.humeConfigIdChat}");
-           _chatChannel!.sink.add(jsonEncode({
-      'type': 'user_input',
-      'text': text,
-    }));
-        
+        _chatChannel!.sink.add(jsonEncode({
+          'type': 'user_input',
+          'text': text,
+        }));
       } catch (e) {
         setState(() {
           print("error: $e");
           _messages.add(Message(text: "Error: $e", isUser: false));
+          _scrollToBottom();
         });
       }
     }
   }
 
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: widget.isDarkMode ? Color(0xFF0D1314) : Colors.white,
       body: SafeArea(
@@ -191,27 +155,25 @@ class _ChatPageState extends State<ChatPage> {
             ),
 
             // Header Section
-             Visibility(
+            Visibility(
               visible: _messages.isEmpty && MediaQuery.of(context).viewInsets.bottom == 0,
-               child: Padding(
-
+              child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                   widget.isDarkMode ? Image.asset("assets/chatscreenlogodark.png", height: getHeight(context, 154), width : getWidth(context, 327))  :Image.asset("assets/chatscreenlogo.png", height: getHeight(context, 154), width : getWidth(context, 327)),
+                    widget.isDarkMode ? Image.asset("assets/chatscreenlogodark.png", height: getHeight(context, 154), width : getWidth(context, 327))  :Image.asset("assets/chatscreenlogo.png", height: getHeight(context, 154), width : getWidth(context, 327)),
                     SizedBox(height: 10),
                     if (_messages.isEmpty) ...[
-                    
-                         ChatOptionCard(
-                          isDarkMode: widget.isDarkMode,
-                          title: "Talk to Someone Who Understands",
-                          subtitle: "Get personalized guidance to improve your well-being.",
-                          onTap: () {
-                            // _messageController.text = "Design a mobile application";
-                            // _sendMessage();
-                          },
+                      ChatOptionCard(
+                        isDarkMode: widget.isDarkMode,
+                        title: "Talk to Someone Who Understands",
+                        subtitle: "Get personalized guidance to improve your well-being.",
+                        onTap: () {
+                          // _messageController.text = "Design a mobile application";
+                          // _sendMessage();
+                        },
                       ),
                       SizedBox(height: 10),
                       ChatOptionCard(
@@ -226,12 +188,13 @@ class _ChatPageState extends State<ChatPage> {
                     ]
                   ],
                 ),
-                           ),
-             ),
+              ),
+            ),
 
             // Chat Messages
             Expanded(
               child: ListView.builder(
+                controller: _scrollController,
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
                 itemCount: _messages.length,
                 itemBuilder: (context, index) {
@@ -376,8 +339,3 @@ class ChatOptionCard extends StatelessWidget {
     );
   }
 }
-
-
-
-
-

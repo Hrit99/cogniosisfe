@@ -51,7 +51,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final storedStartOfMonth = prefs.getString('month_start_date');
     final storedEndOfMonth = prefs.getString('month_end_date');
-
+    print(storedStartOfMonth);
+    print(storedEndOfMonth);
+    print(prefs.getString('month_start_date'));
+    print(prefs.getString('month_end_date'));
     if (storedStartOfMonth == null || storedEndOfMonth == null) {
       prefs.setString('month_start_date', startOfMonth.toIso8601String());
       prefs.setString('month_end_date', endOfMonth.toIso8601String());
