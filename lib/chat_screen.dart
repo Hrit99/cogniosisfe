@@ -17,6 +17,8 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   List<Message> _messages = [];
+  String chatgroupid = "";
+  bool connected = false;
 
   WebSocketChannel? _chatChannel;
 
@@ -31,19 +33,32 @@ class _ChatPageState extends State<ChatPage> {
 
   // Opens a websocket connection to the EVI API and registers a listener to handle
   // incoming messages.
-  void _connect() {
+  void _connect() async {
     try {
-      print(
-          "ConfigManager.instance.humeAccessToken: ${ConfigManager.instance.humeAccessToken}");
+      // print(
+      //     "ConfigManager.instance.humeAccessToken: ${ConfigManager.instance.humeAccessToken}");
       print(
           "ConfigManager.instance.humeApiKey: ${ConfigManager.instance.humeApiKey}");
       print(
           "ConfigManager.instance.humeConfigIdChat: ${ConfigManager.instance.humeConfigIdChat}");
 
+      try {
+        final accessToken = await ConfigManager.instance.fetchAccessToken();
+        ConfigManager.instance.humeAccessToken = accessToken;
+      } catch (error) {
+        debugPrint("Error fetching access token: $error");
+      }
+
+      print("ConfigManager.instance.humeAccessToken: ${ConfigManager.instance.humeAccessToken}");
+
       var uri = 'wss://api.hume.ai/v0/evi/chat';
       if (ConfigManager.instance.humeAccessToken.isNotEmpty) {
+        print("chatgroupid: $chatgroupid");
         uri +=
             '?access_token=${ConfigManager.instance.humeAccessToken}&config_id=${ConfigManager.instance.humeConfigIdChat}';
+        if (chatgroupid.isNotEmpty) {
+          uri += '&resumed_chat_group_id=$chatgroupid';
+        }
       } else if (ConfigManager.instance.humeApiKey.isNotEmpty) {
         print(
             "ConfigManager.instance.humeApiKey: ${ConfigManager.instance.humeApiKey}");
@@ -55,17 +70,24 @@ class _ChatPageState extends State<ChatPage> {
       _chatChannel = WebSocketChannel.connect(Uri.parse(uri));
 
       print("uri: $uri");
+      connected = true;
 
       _chatChannel!.stream.listen(
         (event) async {
           final message = evi.EviMessage.decode(event);
-          debugPrint("Received message: ${message.type}");
+          print("message: ${message.rawJson}");
+          if(chatgroupid.isEmpty){
+            chatgroupid = message.rawJson["chat_group_id"] ?? '';
+          }
+         
           switch (message) {
             case (evi.AssistantMessage assistantMessage):
-              setState(() {
-                _messages.add(Message(text: assistantMessage.message.content, isUser: false));
-                _scrollToBottom();
-              });
+              if (!(assistantMessage.message.content == "Hi I am Sofie. I am a Mental health AI assistant." && _messages.isNotEmpty)) {
+                setState(() {
+                  _messages.add(Message(text: assistantMessage.message.content, isUser: false));
+                  _scrollToBottom();
+                });
+              }
               break;
             default:
               break;
@@ -76,6 +98,9 @@ class _ChatPageState extends State<ChatPage> {
           debugPrint("Connection error: $error");
         },
         onDone: () {
+          if(connected){
+            _connect();
+          }
           debugPrint("Connection closed");
         },
       );
@@ -89,6 +114,7 @@ class _ChatPageState extends State<ChatPage> {
 
   void _disconnect() {
     try {
+      connected = false;
       _chatChannel?.sink.close();
       debugPrint("Disconnected");
       Navigator.pop(context);
@@ -148,7 +174,7 @@ class _ChatPageState extends State<ChatPage> {
                 child: IconButton(
                   icon: Icon(Icons.arrow_back, color: widget.isDarkMode ? Colors.white : Colors.black),
                   onPressed: () {
-                    Navigator.pop(context);
+                     _disconnect();
                   },
                 ),
               ),

@@ -72,6 +72,6 @@ class ConfigManager {
     // humeApiKey = fetchHumeApiKey();
 
     // Uncomment this to use an access token in production.
-    humeAccessToken = await fetchAccessToken();
+    // humeAccessToken = await fetchAccessToken();
 }
 }

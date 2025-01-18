@@ -175,6 +175,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _isConnected = false;
   //bool _isMuted = false;
   var chatEntries = <ChatEntry>[];
+   String chatgroupid = "";
 
   // As EVI speaks, it will send audio segments to be played back. Sometimes a new segment
   // will arrive before the old audio segment has had a chance to finish playing, so -- instead
@@ -361,29 +362,44 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // Opens a websocket connection to the EVI API and registers a listener to handle
   // incoming messages.
-  void _connect() {
+  void _connect() async{
     _audioInputBuffer.clear();
     try {
-      print(
-          "ConfigManager.instance.humeAccessToken: ${ConfigManager.instance.humeAccessToken}");
+      // print(
+      //     "ConfigManager.instance.humeAccessToken: ${ConfigManager.instance.humeAccessToken}");
       print(
           "ConfigManager.instance.humeApiKey: ${ConfigManager.instance.humeApiKey}");
       print(
           "ConfigManager.instance.humeConfigId: ${ConfigManager.instance.humeConfigId}");
-      setState(() {
-        // _stopTune();
-        _isConnected = true;
-      });
+  
+        try {
+        final accessToken = await ConfigManager.instance.fetchAccessToken();
+        ConfigManager.instance.humeAccessToken = accessToken;
+      } catch (error) {
+        debugPrint("Error fetching access token: $error");
+      }
+
+      print("ConfigManager.instance.humeAccessToken: ${ConfigManager.instance.humeAccessToken}");
+
       // if (ConfigManager.instance.humeApiKey.isNotEmpty &&
       //     ConfigManager.instance.humeAccessToken.isNotEmpty) {
       //   throw Exception(
       //       'Please use either an API key or an access token, not both');
       // }
 
+          setState(() {
+        // _stopTune();
+        _isConnected = true;
+      });
+
+
       var uri = 'wss://api.hume.ai/v0/evi/chat';
       if (ConfigManager.instance.humeAccessToken.isNotEmpty) {
         uri +=
             '?access_token=${ConfigManager.instance.humeAccessToken}&config_id=${ConfigManager.instance.humeConfigId}';
+               if (chatgroupid.isNotEmpty) {
+          uri += '&resumed_chat_group_id=$chatgroupid';
+        }
       } else if (ConfigManager.instance.humeApiKey.isNotEmpty) {
         print(
             "ConfigManager.instance.humeApiKey: ${ConfigManager.instance.humeApiKey}");
@@ -401,6 +417,12 @@ class _MyHomePageState extends State<MyHomePage> {
         final message = evi.EviMessage.decode(event);
         debugPrint("Received message: ${message.type}");
         // This message contains audio data for playback.
+
+          if(chatgroupid.isEmpty){
+            chatgroupid = message.rawJson["chat_group_id"] ?? '';
+          }
+         
+
         switch (message) {
           case (evi.ErrorMessage errorMessage):
             debugPrint("Error: ${errorMessage.message}");
@@ -430,8 +452,10 @@ class _MyHomePageState extends State<MyHomePage> {
           // as well as emotional analysis of the speech.
           case (evi.AssistantMessage assistantMessage):
           print("Assistant message: ${assistantMessage.message.content}");
+           if (!(assistantMessage.message.content == "Hi I am Sofie. I am a Mental health AI assistant." && chatEntries.isNotEmpty)){
             appendNewChatMessage(
                 assistantMessage.message, assistantMessage.models);
+           }
             break;
           case (evi.UserMessage userMessage):
           print("User message: ${userMessage.message.content}");
@@ -445,11 +469,15 @@ class _MyHomePageState extends State<MyHomePage> {
       },
       onError: (error) {
         debugPrint("Connection error: $error");
-        _handleConnectionClosed();
+        // _handleConnectionClosed();
+        _connect();
       },
       onDone: () {
         debugPrint("Connection closed");
-        _handleConnectionClosed();
+        // _handleConnectionClosed();
+        if(_isConnected){
+          _connect();
+        }
       },
     );
 
@@ -462,7 +490,13 @@ class _MyHomePageState extends State<MyHomePage> {
   void _disconnect() {
     try {
       _handleInterruption();
-      _handleConnectionClosed();
+      // _handleConnectionClosed();
+      setState(() {
+        _isConnected = false;
+      });
+
+      _audioInputBuffer.clear();
+      _stopRecording();
 
       _chatChannel?.sink.close();
 
@@ -496,13 +530,13 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void _handleConnectionClosed() {
-    setState(() {
-      _isConnected = false;
-    });
-    _audioInputBuffer.clear();
-    _stopRecording();
-  }
+  // void _handleConnectionClosed() {
+  //   setState(() {
+  //     _isConnected = false;
+  //   });
+  //   _audioInputBuffer.clear();
+  //   _stopRecording();
+  // }
 
   void _handleInterruption() {
     _playbackAudioQueue.clear();
