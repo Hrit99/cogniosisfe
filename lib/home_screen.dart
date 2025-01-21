@@ -31,6 +31,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final ScrollController _scrollController = ScrollController(); // Initialize the ScrollController
+  final GlobalKey<_CustomFloatingActionButtonState> _fabKey = GlobalKey<_CustomFloatingActionButtonState>();
+
   @override
   void initState() {
     super.initState();
@@ -38,11 +41,25 @@ class _HomeScreenState extends State<HomeScreen> {
     _getSharedPreferences().then((prefs) {
       _initializeMonthDates(prefs);
     });
+
+    // Add a listener to the ScrollController
+    _scrollController.addListener(() {
+      // Check if the scroll position is at the bottom
+      bool isAtBottom = _scrollController.position.atEdge && _scrollController.position.pixels != 0;
+      _fabKey.currentState?.updateVisibility(isAtBottom);
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose(); // Dispose the ScrollController
+    super.dispose();
   }
 
   Future<SharedPreferences> _getSharedPreferences() async {
     return await SharedPreferences.getInstance();
   }
+  
 
   void _initializeMonthDates(SharedPreferences prefs) {
     final now = DateTime.now();
@@ -119,6 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         horizontal: getWidth(context, 0),
                         vertical: getHeight(context, 10)),
                     child: SingleChildScrollView(
+                      controller: _scrollController,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
@@ -295,9 +313,57 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
+            floatingActionButton: CustomFloatingActionButton(
+              key: _fabKey,
+              onPressed: () {
+                _scrollController.animateTo(
+                  _scrollController.position.minScrollExtent,
+                  duration: Duration(milliseconds: 300),
+                  curve: Curves.easeOut,
+                );
+              },
+              themeProvider: themeProvider,
+            ),
           );
         }
       },
     );
+  }
+}
+
+class CustomFloatingActionButton extends StatefulWidget {
+  final VoidCallback onPressed;
+  final ThemeProvider themeProvider;
+
+  const CustomFloatingActionButton({
+    Key? key,
+    required this.onPressed,
+    required this.themeProvider,
+  }) : super(key: key);
+
+  @override
+  _CustomFloatingActionButtonState createState() => _CustomFloatingActionButtonState();
+}
+
+class _CustomFloatingActionButtonState extends State<CustomFloatingActionButton> {
+  bool _isVisible = false;
+
+  void updateVisibility(bool isVisible) {
+    if (_isVisible != isVisible) {
+      setState(() {
+        _isVisible = isVisible;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _isVisible
+        ? FloatingActionButton(
+            backgroundColor: widget.themeProvider.isDarkMode ? Colors.black : Colors.white,
+            onPressed: widget.onPressed,
+            child: Icon(Icons.arrow_upward, color: widget.themeProvider.isDarkMode ? Colors.white : Colors.black),
+          )
+        : SizedBox.shrink(); // Return an empty widget if not visible
   }
 }

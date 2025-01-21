@@ -1,6 +1,10 @@
 import 'package:cogniosis/configmanager.dart';
 import 'package:cogniosis/dimensions.dart';
+import 'package:cogniosis/listing_widget.dart';
+import 'package:cogniosis/media_item_screen.dart';
+import 'package:cogniosis/music_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'evi_message.dart' as evi;
 
@@ -69,13 +73,13 @@ class _ChatPageState extends State<ChatPage> {
 
       _chatChannel = WebSocketChannel.connect(Uri.parse(uri));
 
-      print("uri: $uri");
+      // print("uri: $uri");
       connected = true;
 
       _chatChannel!.stream.listen(
         (event) async {
           final message = evi.EviMessage.decode(event);
-          print("message: ${message.rawJson}");
+          // print("message: ${message.rawJson}");
           if(chatgroupid.isEmpty){
             chatgroupid = message.rawJson["chat_group_id"] ?? '';
           }
@@ -83,10 +87,33 @@ class _ChatPageState extends State<ChatPage> {
           switch (message) {
             case (evi.AssistantMessage assistantMessage):
               if (!(assistantMessage.message.content == "Hi I am Sofie. I am a Mental health AI assistant." && _messages.isNotEmpty)) {
-                setState(() {
-                  _messages.add(Message(text: assistantMessage.message.content, isUser: false));
-                  _scrollToBottom();
-                });
+                if (assistantMessage.message.content.contains("Recommendation: ")) {
+                  final recommendation = assistantMessage.message.content.substring("Recommendation:".length).trim();
+                  final parts = recommendation.split(" - ");
+                  if (parts.length == 2) {
+                    final title = parts[0].trim();
+                    final description = parts[1].trim();
+
+                    final musicProvider = Provider.of<MusicProvider>(context, listen: false);
+                    final matchingMusic = musicProvider.getMusic().firstWhere(
+                      (music) => music.title == title && music.description == description
+                    );
+
+                    print("matchingMusic: $matchingMusic");
+
+                    // Add the music tile to the messages
+                    setState(() {
+                      _messages.add(Message(text: assistantMessage.message.content, isUser: false));
+                      _messages.add(Message(text: '', isUser: false, widget: _buildMusicTile(matchingMusic)));
+                      _scrollToBottom();
+                    });
+                  }
+                } else {
+                  setState(() {
+                    _messages.add(Message(text: assistantMessage.message.content, isUser: false));
+                    _scrollToBottom();
+                  });
+                }
               }
               break;
             default:
@@ -159,6 +186,52 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
+  // New widget to display music tile
+  Widget _buildMusicTile(MediaItem music) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MediaItemScreen(mediaItem: music),
+          ),
+        );
+      },
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 5.0),
+        padding: EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          color: widget.isDarkMode ? Color(0xFF292B2A) : Colors.grey.shade300,
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Row(
+          children: [
+            Image.network(music.image, width: 50, height: 50), // Assuming imageUrl is a property of Music
+            SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  music.title,
+                  style: TextStyle(
+                    color: widget.isDarkMode ? Colors.white : Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  music.author,
+                  style: TextStyle(
+                    color: widget.isDarkMode ? Colors.white70 : Colors.black54,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -205,7 +278,7 @@ class _ChatPageState extends State<ChatPage> {
                       ChatOptionCard(
                         isDarkMode: widget.isDarkMode,
                         title: "Build a Path to Better Mental Health",
-                        subtitle: "Share your concerns, and let’s work together to find solutions.",
+                        subtitle: "Share your concerns, and let's work together to find solutions.",
                         onTap: () {
                           // _messageController.text = "Build a new AI project";
                           // _sendMessage();
@@ -238,7 +311,7 @@ class _ChatPageState extends State<ChatPage> {
                             : widget.isDarkMode ? Color(0xFF292B2A) : Colors.grey.shade300,
                         borderRadius: BorderRadius.circular(10.0),
                       ),
-                      child: Text(
+                      child: message.widget ?? Text(
                         message.text,
                         style: TextStyle(
                           color: message.isUser
@@ -308,8 +381,9 @@ class _ChatPageState extends State<ChatPage> {
 class Message {
   final String text;
   final bool isUser;
+  final Widget? widget; // Add a widget property to display custom widgets
 
-  Message({required this.text, required this.isUser});
+  Message({required this.text, required this.isUser, this.widget});
 }
 
 // Predefined Chat Option Widget

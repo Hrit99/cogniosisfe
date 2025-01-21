@@ -5,6 +5,8 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:cogniosis/configmanager.dart';
 import 'package:cogniosis/dimensions.dart';
 import 'package:cogniosis/exercise_provider.dart';
+import 'package:cogniosis/listing_widget.dart';
+import 'package:cogniosis/media_item_screen.dart';
 import 'package:cogniosis/mood_provider.dart';
 import 'package:cogniosis/music_provider.dart';
 import 'package:cogniosis/providers/habit_provider.dart';
@@ -185,6 +187,8 @@ class _MyHomePageState extends State<MyHomePage> {
   // Holds bytes of audio recorded from the user's microphone.
   List<int> _audioInputBuffer = <int>[];
 
+  MediaItem? _currentRecommendation; // State variable to hold the current recommendation
+
   // EVI sends back transcripts of both the user's speech and the assistants speech, along
   // with an analysis of the emotional content of the speech. This method takes
   // of a message from EVI, parses it into a `ChatMessage` type and adds it to `chatEntries` so
@@ -267,10 +271,17 @@ class _MyHomePageState extends State<MyHomePage> {
             left: (MediaQuery.of(context).size.width - getWidth(context, 70))/2,
             child: TimerWidget(isDarkMode: widget.isDarkMode), // Add the TimerWidget here
           ),
+          // Recommendation Tile
+          if (_currentRecommendation != null)
+            Positioned(
+              bottom: getHeight(context, 100), // Adjust the position as needed
+              left: (MediaQuery.of(context).size.width - getWidth(context, 362)) / 2,
+              child: _buildMusicTile(_currentRecommendation!),
+            ),
+          // Connect Button
           Positioned(
             bottom: getHeight(context, 30),
-            left: (MediaQuery.of(context).size.width - getWidth(context, 362)) /
-                2,
+            left: (MediaQuery.of(context).size.width - getWidth(context, 362)) / 2,
             child: Container(
               height: getHeight(context, 56),
               width: getWidth(context, 362),
@@ -359,6 +370,7 @@ class _MyHomePageState extends State<MyHomePage> {
       debugPrint("Error stopping tune: $e");
     }
   }
+  
 
   // Opens a websocket connection to the EVI API and registers a listener to handle
   // incoming messages.
@@ -453,8 +465,33 @@ class _MyHomePageState extends State<MyHomePage> {
           case (evi.AssistantMessage assistantMessage):
           print("Assistant message: ${assistantMessage.message.content}");
            if (!(assistantMessage.message.content == "Hi I am Sofie. I am a Mental health AI assistant." && chatEntries.isNotEmpty)){
-            appendNewChatMessage(
+
+            if (assistantMessage.message.content.contains("Recommendation: ")) {
+                  final recommendation = assistantMessage.message.content.substring("Recommendation:".length).trim();
+                  final parts = recommendation.split(" - ");
+                  if (parts.length == 2) {
+                    final title = parts[0].trim();
+                    final description = parts[1].trim();
+
+                    final musicProvider = Provider.of<MusicProvider>(context, listen: false);
+                    final matchingMusic = musicProvider.getMusic().firstWhere(
+                      (music) => music.title == title && music.description == description
+                    );
+
+                    print("matchingMusic: $matchingMusic");
+
+                    setState(() {
+                    _currentRecommendation = matchingMusic;
+                    });
+
+                    // Add the music tile to the messages
+                  
+                  }
+                } else {
+                             appendNewChatMessage(
                 assistantMessage.message, assistantMessage.models);
+                }
+
            }
             break;
           case (evi.UserMessage userMessage):
@@ -508,14 +545,25 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _enqueueAudioSegment(Source audioSegment) {
+
     debugPrint("Enqueueing audio segment");
     if (!_isConnected) {
       return;
     }
+    print("audioPlayer state: ${_audioPlayer.state}");
     if (_audioPlayer.state == PlayerState.playing) {
       _playbackAudioQueue.add(audioSegment);
+      print("Audio inserted at index: ${_playbackAudioQueue.length - 1}");
     } else {
-      _audioPlayer.play(audioSegment);
+     
+        if (_playbackAudioQueue.isNotEmpty) {
+          final nextAudioSegment = _playbackAudioQueue.removeAt(0);
+          _audioPlayer.play(nextAudioSegment);
+          print("Audio played from queue at index: 0");
+        } else {
+          _audioPlayer.play(audioSegment);
+          print("Audio played after queue is cleared");
+        }
     }
   }
 
@@ -547,7 +595,9 @@ class _MyHomePageState extends State<MyHomePage> {
     try {
       if (_playbackAudioQueue.isNotEmpty) {
         final audioSegment = _playbackAudioQueue.removeAt(0);
+
         _audioPlayer.play(audioSegment);
+        print("Audio played from queue at index: 0");
       }
     } catch (e) {
       debugPrint("Error playing next audio segment: $e");
@@ -621,6 +671,52 @@ class _MyHomePageState extends State<MyHomePage> {
       debugPrint("Error creating URL source from bytes: $e");
       rethrow;
     }
+  }
+
+  // New widget to display music tile
+  Widget _buildMusicTile(MediaItem music) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MediaItemScreen(mediaItem: music),
+          ),
+        );
+      },
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 5.0),
+        padding: EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          color: widget.isDarkMode ? Color(0xFF292B2A) : Colors.grey.shade300,
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Row(
+          children: [
+            Image.network(music.image, width: 50, height: 50), // Assuming imageUrl is a property of Music
+            SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  music.title,
+                  style: TextStyle(
+                    color: widget.isDarkMode ? Colors.white : Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  music.author,
+                  style: TextStyle(
+                    color: widget.isDarkMode ? Colors.white70 : Colors.black54,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
