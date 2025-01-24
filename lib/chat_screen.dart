@@ -1,8 +1,10 @@
 import 'package:cogniosis/configmanager.dart';
 import 'package:cogniosis/dimensions.dart';
+import 'package:cogniosis/exercise_provider.dart';
 import 'package:cogniosis/listing_widget.dart';
 import 'package:cogniosis/media_item_screen.dart';
 import 'package:cogniosis/music_provider.dart';
+import 'package:cogniosis/video_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
@@ -95,7 +97,9 @@ class _ChatPageState extends State<ChatPage> {
                     final description = parts[1].trim();
 
                     final musicProvider = Provider.of<MusicProvider>(context, listen: false);
-                    final matchingMusic = musicProvider.getMusic().firstWhere(
+                    final videoProvider = Provider.of<VideoProvider>(context, listen: false);
+                    final exerciseProvider = Provider.of<ExerciseProvider>(context, listen: false);
+                    final matchingMusic = [...musicProvider.getMusic(), ...videoProvider.getVideos(), ...exerciseProvider.getExercises()].firstWhere(
                       (music) => music.title == title && music.description == description
                     );
 

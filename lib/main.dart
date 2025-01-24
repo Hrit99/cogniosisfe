@@ -405,7 +405,7 @@ class _MyHomePageState extends State<MyHomePage> {
       });
 
 
-      var uri = 'wss://api.hume.ai/v0/evi/chat';
+      var uri = 'wss://api.openai.com/v1/realtime';
       if (ConfigManager.instance.humeAccessToken.isNotEmpty) {
         uri +=
             '?access_token=${ConfigManager.instance.humeAccessToken}&config_id=${ConfigManager.instance.humeConfigId}';
@@ -474,7 +474,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     final description = parts[1].trim();
 
                     final musicProvider = Provider.of<MusicProvider>(context, listen: false);
-                    final matchingMusic = musicProvider.getMusic().firstWhere(
+                    final videoProvider = Provider.of<VideoProvider>(context, listen: false);
+                    final exerciseProvider = Provider.of<ExerciseProvider>(context, listen: false);
+                    final matchingMusic = [...musicProvider.getMusic(), ...videoProvider.getVideos(), ...exerciseProvider.getExercises()].firstWhere(
                       (music) => music.title == title && music.description == description
                     );
 

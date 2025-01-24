@@ -4,6 +4,7 @@ import 'package:cogniosis/dimensions.dart';
 import 'package:cogniosis/home_screen.dart';
 import 'package:cogniosis/screens/account_info_screen.dart';
 import 'package:cogniosis/screens/help_centre_screen.dart';
+import 'package:cogniosis/screens/privacy_policy_screen.dart';
 import 'package:cogniosis/screens/reset_password_screen.dart';
 import 'package:cogniosis/screens/terms_service_screen.dart';
 import 'package:cogniosis/splash_screen.dart';
@@ -23,7 +24,7 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile'),
+        title: Text('Profile', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),),
         backgroundColor: isDarkMode ? Color(0xFF0D1314) : Colors.white,
         iconTheme: IconThemeData(
           color: isDarkMode ? Colors.white : Colors.black,
@@ -73,6 +74,14 @@ class ProfileScreen extends StatelessWidget {
           ),
           _buildProfileOption(
             context,
+            icon: Icons.privacy_tip,
+            text: 'Privacy Policy',
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => PrivacyPolicyScreen()));
+            },
+          ),
+          _buildProfileOption(
+            context,
             icon: Icons.share,
             text: 'Share App',
             onTap: () {},
@@ -96,22 +105,25 @@ class ProfileScreen extends StatelessWidget {
     final isDarkMode = Provider.of<ThemeProvider>(context).isDarkMode;
 
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 8.0),
+      height: getHeight(context, 65),
+      margin: EdgeInsets.symmetric(vertical: 4.0),
       decoration: BoxDecoration(
         color: isDarkMode ? Color(0xFF1D2122) : Colors.grey[200],
         borderRadius: BorderRadius.circular(10),
       ),
       child: ListTile(
-        leading: Icon(icon, color: isDarkMode ? Colors.white : Colors.black),
+        leading: Icon(icon, color: isDarkMode ? Colors.white : Colors.black, size: getHeight(context, 20),),
         title: Text(
           text,
           style: TextStyle(
             color: isDarkMode ? Colors.white : Colors.black,
             fontWeight: FontWeight.bold,
+            fontSize: getHeight(context, 18),
           ),
         ),
-        trailing: Icon(Icons.arrow_forward_ios, color: isDarkMode ? Colors.white : Colors.black),
+        trailing: Icon(Icons.arrow_forward_ios, color: isDarkMode ? Colors.white : Colors.black, size: getHeight(context, 20),),
         onTap: onTap,
+        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
       ),
     );
   }
