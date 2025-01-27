@@ -405,7 +405,7 @@ class _MyHomePageState extends State<MyHomePage> {
       });
 
 
-      var uri = 'wss://api.openai.com/v1/realtime';
+      var uri = 'wss://api.hume.ai/v0/evi/chat';
       if (ConfigManager.instance.humeAccessToken.isNotEmpty) {
         uri +=
             '?access_token=${ConfigManager.instance.humeAccessToken}&config_id=${ConfigManager.instance.humeConfigId}';
