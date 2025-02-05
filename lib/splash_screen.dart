@@ -15,6 +15,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   final String videoUrl = 'https://aizenstorage.s3.us-east-1.amazonaws.com/splash.mp4'; // Replace with your video URL
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  String accessToken = ''; // Replace with actual access token retrieval logic
 
   @override
   void initState() {
@@ -28,6 +29,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       curve: Curves.easeIn,
     );
     _initializeVideoPlayer();
+
+    // Check access token and show dialog if blank
+    if (accessToken.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showImportantNoticeDialog();
+      });
+    }
   }
 
   Future<void> _initializeVideoPlayer() async {
@@ -39,6 +47,30 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         _controller?.setLooping(true); // Loop the video
         _animationController.forward(); // Start the fade-in animation
       });
+  }
+
+  void _showImportantNoticeDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Important Notice'),
+          content: Text(
+            'This app is powered by artificial intelligence and is designed for self-reflection and emotional support only.\n\n'
+            'It is not a substitute for professional medical advice, diagnosis, or treatment. If you\'re experiencing a mental health crisis, '
+            'please contact a qualified healthcare provider or emergency services.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('I understand and agree'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -126,6 +158,24 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     'assets/splashscreenicon.png',
                     width: getWidth(context, 222),
                     height: getHeight(context, 65),
+                  ),
+                  SizedBox(
+                      height: 16), // Add some space between the image and text
+                  Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: getWidth(context, 45)),
+                    child: Text(
+                      'AI Mental Health Support App',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Color(0xFFFFFFFF),
+                        fontFamily: 'Satoshi',
+                        fontSize: getWidth(context, 20),
+                        fontStyle: FontStyle.normal,
+                        fontWeight: FontWeight.bold,
+                        height: getHeight(context, 1.5),
+                      ),
+                    ),
                   ),
                   SizedBox(
                       height: 16), // Add some space between the image and text
