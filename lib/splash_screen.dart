@@ -183,7 +183,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     padding:
                         EdgeInsets.symmetric(horizontal: getWidth(context, 45)),
                     child: Text(
-                      'Find peace, focus, and support anytime you need',
+                      'Find peace, focus, and support anytime you need it.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color:
