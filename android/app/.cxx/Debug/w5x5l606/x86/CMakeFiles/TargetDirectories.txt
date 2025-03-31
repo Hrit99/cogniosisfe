@@ -1,0 +1,2 @@
+C:/Users/hriti/aizen/flutterapp/cogniosisfe/android/app/.cxx/Debug/w5x5l606/x86/CMakeFiles/edit_cache.dir
+C:/Users/hriti/aizen/flutterapp/cogniosisfe/android/app/.cxx/Debug/w5x5l606/x86/CMakeFiles/rebuild_cache.dir
